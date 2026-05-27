@@ -3,360 +3,888 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CompIQ Architect — Accenture Workday Compensation</title>
+<title>CompIQ Architect — Workday Compensation</title>
 <style>
-/* ─── RESET ─── */
+/* ─── RESET ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #EEECf4; color: #1a1a2e; min-height: 100vh; }
-
-:root {
-  --purple: #2D1B69;
-  --purple-mid: #4527A0;
-  --purple-light: #EDE7F6;
-  --accent: #7C4DFF;
-  --green: #00897B;
-  --green-light: #E0F2F1;
-  --orange: #E65100;
-  --text: #1a1a2e;
-  --text-muted: #6B7280;
-  --border: #E5E7EB;
-  --card: #FFFFFF;
-  --radius: 14px;
-  --shadow: 0 2px 14px rgba(45,27,105,0.09);
+html { -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  background: #F5F5F7;
+  color: #1D1D1F;
+  min-height: 100vh;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ─── HEADER ─── */
-.app-header {
-  background: var(--purple);
-  color: white;
-  padding: 0 24px;
-  height: 64px;
+/* ─── DESIGN TOKENS ─────────────────────────────────────────────── */
+:root {
+  --bg:          #F5F5F7;
+  --surface:     #FFFFFF;
+  --surface-2:   #F9F9FB;
+  --glass:       rgba(255,255,255,0.88);
+  --primary:     #5E5CE6;
+  --primary-dk:  #3634A3;
+  --primary-lt:  #EEEEFF;
+  --primary-gd:  linear-gradient(135deg, #7B79F7 0%, #5E5CE6 50%, #3634A3 100%);
+  --green:       #34C759;
+  --green-lt:    #F0FFF4;
+  --orange:      #FF9500;
+  --orange-lt:   #FFF8EE;
+  --red:         #FF3B30;
+  --text:        #1D1D1F;
+  --text-2:      #6E6E73;
+  --text-3:      #AEAEB2;
+  --separator:   rgba(60,60,67,0.12);
+  --fill:        rgba(120,120,128,0.12);
+  --fill-2:      rgba(120,120,128,0.08);
+  --spring:      cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease:        cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --r-sm:        10px;
+  --r:           14px;
+  --r-lg:        20px;
+  --r-xl:        28px;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow:      0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-lg:   0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* ─── KEYFRAMES ─────────────────────────────────────────────────── */
+@keyframes springIn {
+  0%   { opacity: 0; transform: scale(0.88) translateY(20px); }
+  55%  { opacity: 1; transform: scale(1.03) translateY(-3px); }
+  75%  { transform: scale(0.99) translateY(1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bubbleRight {
+  0%   { opacity: 0; transform: scale(0.72) translate(18px, 6px); }
+  60%  { transform: scale(1.04) translate(-2px, -1px); }
+  100% { opacity: 1; transform: scale(1) translate(0, 0); }
+}
+@keyframes bubbleLeft {
+  0%   { opacity: 0; transform: scale(0.72) translate(-18px, 6px); }
+  60%  { transform: scale(1.04) translate(2px, -1px); }
+  100% { opacity: 1; transform: scale(1) translate(0, 0); }
+}
+@keyframes dotBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-5px); }
+}
+@keyframes glimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(60px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(60px) scale(0.9); }
+}
+@keyframes pillarGrow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+/* ─── NAV / HEADER ─────────────────────────────────────────────── */
+.app-nav {
+  background: rgba(255,255,255,0.88);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 0.5px solid rgba(60,60,67,0.18);
+  padding: 0 20px;
+  height: 60px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.28);
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
 }
-.header-icon {
-  width: 40px; height: 40px;
-  background: rgba(255,255,255,0.14);
+.nav-icon {
+  width: 38px; height: 38px;
+  background: var(--primary-gd);
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0;
+  font-size: 20px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(94,92,230,0.35);
 }
-.header-titles h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-.header-titles p { font-size: 11px; opacity: 0.6; margin-top: 1px; }
-.header-badge {
-  margin-left: auto;
-  background: rgba(124,77,255,0.35);
-  border: 1px solid rgba(124,77,255,0.5);
-  color: #D8CCFF;
-  padding: 4px 10px; border-radius: 20px;
-  font-size: 11px; font-weight: 600;
+.nav-copy { flex: 1; min-width: 0; }
+.nav-copy h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-copy p {
+  font-size: 11px;
+  color: var(--text-2);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-pill {
+  flex-shrink: 0;
+  background: var(--primary-lt);
+  color: var(--primary);
+  border: 1px solid rgba(94,92,230,0.22);
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
 }
 
-/* ─── TABS ─── */
-.tab-bar {
-  background: var(--purple);
-  padding: 0 20px;
-  display: flex; gap: 2px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+/* ─── SEGMENTED TAB BAR ─────────────────────────────────────────── */
+.tab-shell {
+  background: rgba(255,255,255,0.88);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 0.5px solid rgba(60,60,67,0.12);
+  padding: 10px 16px;
+  position: sticky;
+  top: 60px;
+  z-index: 190;
+}
+.tab-track {
+  background: rgba(120,120,128,0.12);
+  border-radius: 11px;
+  padding: 2px;
+  display: flex;
+  position: relative;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.tab-indicator {
+  position: absolute;
+  top: 2px; bottom: 2px; left: 2px;
+  width: calc(25% - 2px);
+  background: var(--surface);
+  border-radius: 9px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.14), 0 0.5px 1.5px rgba(0,0,0,0.08);
+  transition: transform 0.38s var(--spring);
+  pointer-events: none;
 }
 .tab-btn {
-  background: none; border: none;
-  color: rgba(255,255,255,0.55);
-  padding: 12px 18px;
-  font-size: 13px; font-weight: 500;
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 8px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
   cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: all 0.18s;
+  border-radius: 9px;
+  transition: color 0.22s var(--ease);
+  position: relative;
+  z-index: 1;
   white-space: nowrap;
+  font-family: inherit;
+  letter-spacing: -0.1px;
 }
-.tab-btn:hover { color: rgba(255,255,255,0.9); }
-.tab-btn.active { color: white; border-bottom-color: #7C4DFF; }
+.tab-btn.active { color: var(--text); }
+.tab-btn:active { transform: scale(0.96); }
 
-/* ─── LAYOUT ─── */
-.main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; }
+/* ─── LAYOUT ────────────────────────────────────────────────────── */
+.main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 14px 60px;
+  width: 100%;
+}
 .tab-panel { display: none; }
-.tab-panel.active { display: block; }
+.tab-panel.active { display: block; animation: fadeSlide 0.32s var(--ease) both; }
 
-/* ─── CARDS ─── */
+/* ─── STAGGER ENTRANCE ─────────────────────────────────────────── */
+.stagger-in > * {
+  animation: springIn 0.46s var(--spring) both;
+}
+.stagger-in > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger-in > *:nth-child(2) { animation-delay: 0.07s; }
+.stagger-in > *:nth-child(3) { animation-delay: 0.12s; }
+.stagger-in > *:nth-child(4) { animation-delay: 0.17s; }
+.stagger-in > *:nth-child(5) { animation-delay: 0.22s; }
+.stagger-in > *:nth-child(6) { animation-delay: 0.27s; }
+.stagger-in > *:nth-child(7) { animation-delay: 0.32s; }
+.stagger-in > *:nth-child(8) { animation-delay: 0.37s; }
+.stagger-in > *:nth-child(9) { animation-delay: 0.42s; }
+.stagger-in > *:nth-child(10){ animation-delay: 0.47s; }
+
+/* ─── CARDS ─────────────────────────────────────────────────────── */
 .card {
-  background: var(--card);
-  border-radius: var(--radius);
+  background: var(--surface);
+  border-radius: var(--r-lg);
   box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  border: 0.5px solid rgba(60,60,67,0.10);
   padding: 24px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  transition: box-shadow 0.22s var(--ease), transform 0.22s var(--ease);
+}
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
-/* ─── BUTTONS ─── */
+/* ─── BUTTONS ────────────────────────────────────────────────────── */
 .btn {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 10px 20px; border-radius: 10px;
-  font-size: 14px; font-weight: 600;
-  cursor: pointer; border: none; font-family: inherit;
-  transition: all 0.18s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 22px;
+  border-radius: var(--r-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: opacity 0.15s, transform 0.15s var(--spring), box-shadow 0.15s;
+  letter-spacing: -0.1px;
+  -webkit-user-select: none;
+  user-select: none;
 }
-.btn-primary { background: var(--purple); color: white; }
-.btn-primary:hover { background: var(--purple-mid); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,27,105,0.25); }
-.btn-secondary { background: var(--purple-light); color: var(--purple); }
-.btn-secondary:hover { background: #DDD6F5; }
-.btn-ghost { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
-.btn-ghost:hover { background: #F5F4FB; }
+.btn:active { transform: scale(0.96); }
+.btn-primary {
+  background: var(--primary-gd);
+  color: white;
+  box-shadow: 0 2px 8px rgba(94,92,230,0.35);
+}
+.btn-primary:hover { box-shadow: 0 4px 16px rgba(94,92,230,0.45); opacity: 0.92; }
+.btn-secondary { background: var(--primary-lt); color: var(--primary); }
+.btn-secondary:hover { background: #E2E1FC; }
+.btn-ghost {
+  background: var(--fill);
+  color: var(--text-2);
+}
+.btn-ghost:hover { background: var(--fill-2); }
 .btn-sm { padding: 8px 16px; font-size: 13px; }
-.btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-/* ─── BADGES ─── */
+/* ─── BADGES ─────────────────────────────────────────────────────── */
 .badge {
-  display: inline-block; padding: 3px 9px;
-  border-radius: 20px; font-size: 11px;
-  font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.badge-config   { background: #EDE7F6; color: #4527A0; }
+.badge-config   { background: #EEEEFF; color: #3634A3; }
 .badge-eib      { background: #E3F2FD; color: #1565C0; }
 .badge-trouble  { background: #FFF3E0; color: #BF360C; }
 .badge-security { background: #FCE4EC; color: #880E4F; }
 .badge-process  { background: #E8F5E9; color: #1B5E20; }
 
-/* ─── STEP INDICATOR ─── */
-.step-dots { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 6px; }
-.dot { width: 10px; height: 10px; border-radius: 50%; background: #DDD; transition: all 0.25s; }
-.dot.active { background: var(--purple); transform: scale(1.4); }
+/* ─── STEP INDICATOR ────────────────────────────────────────────── */
+.step-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--fill);
+  transition: all 0.3s var(--spring);
+}
+.dot.active {
+  background: var(--primary);
+  transform: scale(1.5);
+  box-shadow: 0 0 0 3px rgba(94,92,230,0.2);
+}
 .dot.done { background: var(--green); }
-.step-label { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+.step-label {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-2);
+  margin-bottom: 22px;
+}
 .step-label strong { color: var(--text); }
 
-/* ─── CHOICE GRID ─── */
-.choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.choice-card {
-  background: white; border: 2px solid var(--border);
-  border-radius: 12px; padding: 18px;
-  cursor: pointer; transition: all 0.18s; text-align: left;
-}
-.choice-card:hover { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,77,255,0.1); }
-.choice-card.selected { border-color: var(--accent); background: #F6F0FF; }
-.choice-card .ci { font-size: 26px; margin-bottom: 8px; display: block; }
-.choice-card .cl { font-weight: 700; font-size: 14px; }
-.choice-card .cd { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
-
-/* ─── TOPIC CHIPS ─── */
-.topic-grid { display: flex; flex-wrap: wrap; gap: 9px; }
-.topic-chip {
-  padding: 9px 15px; border-radius: 10px;
-  border: 2px solid var(--border); background: white;
-  cursor: pointer; font-size: 13px; font-weight: 500;
-  transition: all 0.18s; font-family: inherit;
-}
-.topic-chip:hover { border-color: var(--accent); }
-.topic-chip.selected { border-color: var(--accent); background: #F6F0FF; color: var(--purple); font-weight: 600; }
-
-/* ─── CIQ LAYOUT ─── */
-.ciq-wrap {
+/* ─── CHOICE GRID ────────────────────────────────────────────────── */
+.choice-grid {
   display: grid;
-  grid-template-columns: 215px 1fr;
-  gap: 14px;
-  height: calc(100vh - 168px);
-  min-height: 520px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
-.ciq-sidebar { display: flex; flex-direction: column; gap: 10px; }
-.sidebar-card {
-  background: white; border-radius: 12px;
-  padding: 14px; border: 1px solid var(--border);
+.choice-card {
+  background: var(--surface);
+  border: 1.5px solid var(--separator);
+  border-radius: var(--r);
+  padding: 14px 12px;
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.22s var(--spring), transform 0.22s var(--spring);
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-family: inherit;
 }
-.sb-label {
-  font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.6px;
-  color: var(--text-muted); margin-bottom: 8px;
+.choice-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(94,92,230,0.1), var(--shadow);
+  transform: scale(1.015) translateY(-1px);
 }
-.sb-select {
-  width: 100%; padding: 8px 10px;
-  border-radius: 8px; border: 1.5px solid var(--border);
-  font-size: 13px; background: white; color: var(--text);
-  cursor: pointer; font-family: inherit;
+.choice-card.selected {
+  border-color: var(--primary);
+  background: var(--primary-lt);
+  box-shadow: 0 0 0 3px rgba(94,92,230,0.15);
 }
-.sb-select:focus { outline: none; border-color: var(--accent); }
-.sugg-list { display: flex; flex-direction: column; gap: 5px; }
-.sugg-btn {
-  background: var(--purple-light); border: none;
-  border-radius: 8px; padding: 8px 10px;
-  font-size: 11px; color: var(--purple);
-  cursor: pointer; text-align: left;
-  transition: background 0.15s; font-family: inherit; line-height: 1.4;
-}
-.sugg-btn:hover { background: #DDD6F5; }
+.choice-card .ci { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.choice-card .ct { flex: 1; min-width: 0; }
+.choice-card .cl { font-weight: 700; font-size: 13px; line-height: 1.3; }
+.choice-card .cd { font-size: 11px; color: var(--text-2); margin-top: 3px; line-height: 1.4; }
 
-/* ─── CIQ CHAT ─── */
+/* ─── TOPIC CHIPS ────────────────────────────────────────────────── */
+.topic-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.topic-chip {
+  padding: 9px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--separator);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s var(--spring);
+  font-family: inherit;
+  color: var(--text);
+}
+.topic-chip:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.topic-chip.selected {
+  border-color: var(--primary);
+  background: var(--primary-lt);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* ─── CIQ LAYOUT ─────────────────────────────────────────────────── */
+.ciq-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: calc(100vh - 185px);
+  min-height: 500px;
+}
+
+/* Settings bar */
+.ciq-settings-bar {
+  background: var(--surface);
+  border-radius: var(--r);
+  border: 0.5px solid rgba(60,60,67,0.10);
+  box-shadow: var(--shadow-sm);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.bar-label {
+  font-size: 16px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.ciq-settings-fields { display: contents; }
+.sb-select {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--separator);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--fill-2);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.sb-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(94,92,230,0.12);
+}
+
+/* Suggestion chips */
+.sugg-row {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+  flex-shrink: 0;
+}
+.sugg-row::-webkit-scrollbar { display: none; }
+.sugg-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.sugg-btn {
+  background: var(--surface);
+  border: 1.5px solid rgba(94,92,230,0.3);
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.2s var(--spring);
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+.sugg-btn:hover {
+  background: var(--primary-lt);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(94,92,230,0.18);
+}
+.sugg-btn:active { transform: scale(0.95); }
+
+/* ─── CHAT ───────────────────────────────────────────────────────── */
 .ciq-chat {
-  display: flex; flex-direction: column;
-  background: white; border-radius: 12px;
-  border: 1px solid var(--border); overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  border: 0.5px solid rgba(60,60,67,0.10);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
 }
 .ciq-msgs {
-  flex: 1; overflow-y: auto; padding: 20px;
-  display: flex; flex-direction: column; gap: 16px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   scroll-behavior: smooth;
 }
-.msg { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp 0.28s ease; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
-.msg.user { flex-direction: row-reverse; }
-.msg-av {
-  width: 32px; height: 32px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px; flex-shrink: 0;
-}
-.msg.user .msg-av { background: var(--purple); }
-.msg.ai   .msg-av { background: var(--purple-light); }
-.msg-bub {
-  max-width: 78%; padding: 13px 16px;
-  border-radius: 16px; font-size: 13.5px; line-height: 1.65;
-}
-.msg.user .msg-bub { background: var(--purple); color: white; border-bottom-right-radius: 4px; }
-.msg.ai   .msg-bub { background: #F8F6FD; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
-.msg-bub h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
-.msg-bub ol, .msg-bub ul { padding-left: 18px; margin-top: 8px; }
-.msg-bub li { margin-bottom: 4px; font-size: 13px; }
-.msg-bub .tip {
-  margin-top: 10px; padding: 8px 12px;
-  background: var(--green-light); border-radius: 8px;
-  font-size: 12px; color: #1B5E20;
-}
-.msg-bub .errs { margin-top: 8px; font-size: 12px; color: var(--orange); }
 
+/* iMessage-style messages */
+.msg { display: flex; gap: 8px; align-items: flex-end; }
+.msg.user { flex-direction: row-reverse; }
+
+.msg-av {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.msg.user .msg-av { background: var(--primary-gd); box-shadow: 0 2px 6px rgba(94,92,230,0.3); }
+.msg.ai   .msg-av { background: var(--fill); }
+
+.bubble {
+  max-width: 78%;
+  padding: 11px 15px;
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+.msg.user .bubble {
+  background: var(--primary-gd);
+  color: white;
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 2px 8px rgba(94,92,230,0.25);
+  animation: bubbleRight 0.34s var(--spring) both;
+}
+.msg.ai .bubble {
+  background: var(--fill-2);
+  border: 0.5px solid var(--separator);
+  border-radius: 18px 18px 18px 4px;
+  color: var(--text);
+  animation: bubbleLeft 0.36s var(--spring) both;
+}
+.bubble h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.bubble ol, .bubble ul { padding-left: 18px; margin-top: 8px; }
+.bubble li { margin-bottom: 4px; font-size: 13px; }
+.bubble .tip {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: var(--green-lt);
+  border-radius: 8px;
+  font-size: 12px;
+  color: #1B5E20;
+  border-left: 3px solid var(--green);
+}
+.bubble .errs {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #BF360C;
+  background: var(--orange-lt);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border-left: 3px solid var(--orange);
+}
+
+/* Typing indicator */
+.typing { display: flex; gap: 5px; align-items: center; padding: 2px 0; }
+.typing span {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--text-3);
+  animation: dotBounce 1.2s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.18s; }
+.typing span:nth-child(3) { animation-delay: 0.36s; }
+
+/* Chat input bar */
 .ciq-bar {
-  padding: 12px 16px; border-top: 1px solid var(--border);
-  display: flex; gap: 9px; align-items: flex-end;
+  padding: 10px 12px;
+  border-top: 0.5px solid var(--separator);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  background: var(--surface);
+  flex-shrink: 0;
 }
 .ciq-input {
-  flex: 1; padding: 10px 14px;
-  border: 1.5px solid var(--border); border-radius: 10px;
-  font-size: 13px; resize: none; font-family: inherit;
-  min-height: 42px; max-height: 120px;
-  transition: border-color 0.18s;
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--separator);
+  border-radius: 22px;
+  font-size: 13.5px;
+  resize: none;
+  font-family: inherit;
+  min-height: 40px;
+  max-height: 120px;
+  transition: border-color 0.15s, box-shadow 0.15s;
   line-height: 1.5;
+  background: var(--fill-2);
+  color: var(--text);
 }
-.ciq-input:focus { outline: none; border-color: var(--accent); }
-
-/* ─── TYPING INDICATOR ─── */
-.typing { display: flex; gap: 4px; align-items: center; padding: 14px 16px; }
-.typing span {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--text-muted); animation: bounce 1.2s infinite;
+.ciq-input::placeholder { color: var(--text-3); }
+.ciq-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px rgba(94,92,230,0.12);
 }
-.typing span:nth-child(2) { animation-delay: 0.2s; }
-.typing span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+.send-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--primary-gd);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(94,92,230,0.35);
+  transition: transform 0.2s var(--spring), box-shadow 0.15s;
+}
+.send-btn:hover { transform: scale(1.1); box-shadow: 0 4px 12px rgba(94,92,230,0.45); }
+.send-btn:active { transform: scale(0.9); }
 
-/* ─── Q&A ─── */
-.filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+/* ─── Q&A REFERENCE ─────────────────────────────────────────────── */
+.filter-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
 .fchip {
-  padding: 7px 14px; border-radius: 20px;
-  border: 1.5px solid var(--border);
-  background: white; cursor: pointer;
-  font-size: 12px; font-weight: 600;
-  transition: all 0.15s; font-family: inherit;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--separator);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s var(--spring);
+  font-family: inherit;
+  color: var(--text-2);
+  box-shadow: var(--shadow-sm);
 }
-.fchip:hover { border-color: var(--accent); }
-.fchip.on { background: var(--purple); color: white; border-color: var(--purple); }
-.qa-list { display: flex; flex-direction: column; gap: 10px; }
-.qa-card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+.fchip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+.fchip.on {
+  background: var(--primary-gd);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(94,92,230,0.3);
+}
+
+.qa-list { display: flex; flex-direction: column; gap: 8px; }
+.qa-card {
+  background: var(--surface);
+  border-radius: var(--r);
+  border: 0.5px solid rgba(60,60,67,0.10);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow 0.2s var(--ease);
+  animation: fadeSlide 0.28s var(--ease) both;
+}
+.qa-card:hover { box-shadow: var(--shadow); }
 .qa-head {
-  padding: 15px 20px; cursor: pointer;
-  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   transition: background 0.12s;
+  -webkit-user-select: none;
+  user-select: none;
 }
-.qa-head:hover { background: #FAFAFA; }
-.qa-head .hl { display: flex; align-items: center; gap: 11px; }
-.qa-title { font-weight: 600; font-size: 14px; }
-.qa-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border); }
-.qa-card.open .qa-body { display: block; }
-.qa-desc { font-size: 13px; color: var(--text-muted); margin-top: 12px; margin-bottom: 14px; }
-.qa-sec-label {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 7px;
+.qa-head:hover { background: var(--fill-2); }
+.qa-head:active { background: var(--fill); }
+.qa-head .hl { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.qa-title { font-weight: 600; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chev {
+  color: var(--text-3);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: transform 0.3s var(--spring);
+  margin-left: 8px;
 }
-.qa-steps { padding-left: 20px; }
-.qa-steps li { font-size: 13px; line-height: 1.7; }
-.qa-tip { background: var(--green-light); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #1B5E20; margin-top: 10px; }
-.qa-err { background: #FFF3E0; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--orange); margin-top: 10px; }
-.chev { transition: transform 0.2s; color: var(--text-muted); font-size: 12px; }
 .qa-card.open .chev { transform: rotate(180deg); }
 
-/* ─── SMARTSHEET SYNC ─── */
-.ss-prompt-box {
-  background: #1a0533; color: #DDCEFF;
-  border-radius: 12px; padding: 20px;
-  font-family: 'Courier New', monospace;
-  font-size: 12px; line-height: 1.75;
-  white-space: pre-wrap; word-break: break-word;
-  max-height: 230px; overflow-y: auto;
+/* Smooth accordion */
+.qa-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s var(--ease), padding 0.3s var(--ease);
+  padding: 0 18px;
 }
-.schema-tbl { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 4px; }
+.qa-card.open .qa-body {
+  max-height: 800px;
+  padding: 0 18px 18px;
+  border-top: 0.5px solid var(--separator);
+}
+.qa-desc { font-size: 13px; color: var(--text-2); margin-top: 12px; margin-bottom: 12px; line-height: 1.6; }
+.qa-sec-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-3);
+  margin-bottom: 7px;
+  margin-top: 2px;
+}
+.qa-steps { padding-left: 18px; }
+.qa-steps li { font-size: 13px; line-height: 1.75; margin-bottom: 2px; }
+.qa-tip {
+  background: var(--green-lt);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 13px;
+  color: #1B5E20;
+  margin-top: 10px;
+  border-left: 3px solid var(--green);
+}
+.qa-err {
+  background: var(--orange-lt);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 13px;
+  color: #BF360C;
+  margin-top: 10px;
+  border-left: 3px solid var(--orange);
+}
+
+/* ─── EXPORT / SMARTSHEET SYNC ──────────────────────────────────── */
+.prompt-card {
+  background: #1C1C1E;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+.prompt-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--primary-gd);
+}
+.prompt-card-header {
+  padding: 18px 20px 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.prompt-card-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #F2F2F7;
+  letter-spacing: -0.3px;
+}
+.prompt-card-header p {
+  font-size: 13px;
+  color: #8E8E93;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.prompt-code {
+  margin: 0 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  border: 0.5px solid rgba(255,255,255,0.08);
+  padding: 16px;
+  font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 11.5px;
+  line-height: 1.8;
+  color: #C9D1D9;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.prompt-code::-webkit-scrollbar { width: 4px; }
+.prompt-code::-webkit-scrollbar-track { background: transparent; }
+.prompt-code::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+.schema-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .schema-tbl th {
-  background: #F8F6FD; padding: 8px 12px;
-  text-align: left; font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.5px;
-  color: var(--text-muted); border-bottom: 1px solid var(--border);
+  background: var(--fill-2);
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-3);
+  border-bottom: 0.5px solid var(--separator);
 }
-.schema-tbl td { padding: 9px 12px; border-bottom: 1px solid #F0EEF8; vertical-align: top; }
+.schema-tbl td {
+  padding: 9px 12px;
+  border-bottom: 0.5px solid var(--separator);
+  vertical-align: top;
+  font-size: 13px;
+}
 .schema-tbl tr:last-child td { border-bottom: none; }
-.sdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
-.s-green { background: #00897B; }
-.s-orange { background: #F57C00; }
-.s-grey { background: #9E9E9E; }
-.sheet-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sdot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; }
+.s-green  { background: var(--green); }
+.s-orange { background: var(--orange); }
+.s-grey   { background: var(--text-3); }
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.sheet-header strong { font-size: 14px; }
+.sheet-status { font-size: 12px; color: var(--text-2); display: flex; align-items: center; }
+
 .info-box {
-  padding: 14px 16px; border-radius: 10px;
-  background: #F5F0FF; font-size: 13px; color: var(--purple);
+  padding: 14px 16px;
+  border-radius: var(--r-sm);
+  background: var(--primary-lt);
+  font-size: 13px;
+  color: var(--primary-dk);
   margin-top: 14px;
+  border: 0.5px solid rgba(94,92,230,0.2);
+  line-height: 1.6;
 }
 
-/* ─── SECTION LABEL ─── */
+/* ─── SECTION LABELS ────────────────────────────────────────────── */
 .sec-title {
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-3);
+  margin-bottom: 14px;
 }
-.sec-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
-hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+.sec-sub { font-size: 13px; color: var(--text-2); margin-bottom: 14px; line-height: 1.6; }
+hr.divider { border: none; border-top: 0.5px solid var(--separator); margin: 18px 0; }
 
-/* ─── TOAST ─── */
+/* ─── TOAST ─────────────────────────────────────────────────────── */
 .toast {
-  position: fixed; bottom: 24px; right: 24px;
-  background: #1a1a2e; color: white;
-  padding: 12px 20px; border-radius: 10px;
-  font-size: 13px; font-weight: 500;
-  transform: translateY(80px); transition: transform 0.25s;
-  z-index: 999; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: rgba(30,30,30,0.92);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+  color: white;
+  padding: 11px 22px;
+  border-radius: 22px;
+  font-size: 13.5px;
+  font-weight: 600;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  letter-spacing: -0.1px;
+  opacity: 0;
+  transition: transform 0.3s var(--spring), opacity 0.3s var(--ease);
+  white-space: nowrap;
 }
-.toast.show { transform: translateY(0); }
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 
-@media (max-width: 660px) {
-  .ciq-wrap { grid-template-columns: 1fr; height: auto; }
+/* ─── RESPONSIVE ────────────────────────────────────────────────── */
+@media (max-width: 500px) {
   .choice-grid { grid-template-columns: 1fr; }
+  .nav-pill { display: none; }
+  .bubble { max-width: 88%; }
+}
+@media (max-width: 380px) {
+  .tab-btn { font-size: 10.5px; }
 }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="app-header">
-  <div class="header-icon">🏗️</div>
-  <div class="header-titles">
+<!-- NAV -->
+<nav class="app-nav">
+  <div class="nav-icon">💼</div>
+  <div class="nav-copy">
     <h1>CompIQ Architect</h1>
-    <p>Accenture · Workday Compensation · T-Mobile PxQ</p>
+    <p>Accenture · T-Mobile PxQ · Workday Compensation</p>
   </div>
-  <div class="header-badge">Workday Comp</div>
+  <div class="nav-pill">CompIQ</div>
+</nav>
+
+<!-- SEGMENTED TAB BAR -->
+<div class="tab-shell">
+  <div class="tab-track" id="tab-track">
+    <div class="tab-indicator" id="tab-indicator"></div>
+    <button class="tab-btn active" onclick="showTab('finder',0,this)">🧭 Find</button>
+    <button class="tab-btn" onclick="showTab('ciq',1,this)">💬 Ask</button>
+    <button class="tab-btn" onclick="showTab('qa',2,this)">📖 Browse</button>
+    <button class="tab-btn" onclick="showTab('sync',3,this)">📋 Export</button>
+  </div>
 </div>
 
-<!-- TAB BAR -->
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('finder',this)">🧭 Solution Finder</button>
-  <button class="tab-btn" onclick="showTab('ciq',this)">🤖 Compensation IQ</button>
-  <button class="tab-btn" onclick="showTab('qa',this)">📚 Q&amp;A Reference</button>
-  <button class="tab-btn" onclick="showTab('sync',this)">📊 Smartsheet Sync</button>
-</div>
-
-<!-- MAIN -->
+<!-- MAIN CONTENT -->
 <div class="main">
 
   <!-- TAB 1: SOLUTION FINDER -->
@@ -367,50 +895,44 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; 
   <!-- TAB 2: COMPENSATION IQ -->
   <div id="tab-ciq" class="tab-panel">
     <div class="ciq-wrap">
-      <div class="ciq-sidebar">
-        <div class="sidebar-card">
-          <div class="sb-label">Your Role</div>
-          <select class="sb-select" id="ciq-role">
-            <option value="consultant">Workday Consultant</option>
-            <option value="client">Client HR Admin</option>
-            <option value="analyst">Business Analyst</option>
+      <!-- Settings bar -->
+      <div class="ciq-settings-bar">
+        <span class="bar-label">⚙️</span>
+        <div class="ciq-settings-fields">
+          <select class="sb-select" id="ciq-role" title="Your role">
+            <option value="consultant">Consultant</option>
+            <option value="client">HR Admin</option>
+            <option value="analyst">Analyst</option>
             <option value="manager">Comp Manager</option>
-            <option value="integrator">Integration Lead</option>
+            <option value="integrator">Integration</option>
           </select>
-        </div>
-        <div class="sidebar-card">
-          <div class="sb-label">Response Mode</div>
-          <select class="sb-select" id="ciq-mode">
-            <option value="quick">⚡ Quick Answer</option>
-            <option value="steps">📋 Step-by-Step</option>
-            <option value="deep">🔬 Deep Dive</option>
+          <select class="sb-select" id="ciq-mode" title="Response detail">
+            <option value="quick">Quick answer</option>
+            <option value="steps">Step-by-step</option>
+            <option value="deep">Full detail</option>
           </select>
-        </div>
-        <div class="sidebar-card">
-          <div class="sb-label">Country / Region</div>
-          <select class="sb-select" id="ciq-country">
-            <option value="US">🇺🇸 United States</option>
-            <option value="UK">🇬🇧 United Kingdom</option>
-            <option value="CA">🇨🇦 Canada</option>
-            <option value="AU">🇦🇺 Australia</option>
-            <option value="DE">🇩🇪 Germany</option>
-            <option value="FR">🇫🇷 France</option>
-            <option value="IN">🇮🇳 India</option>
-            <option value="GLOBAL">🌍 Global</option>
+          <select class="sb-select" id="ciq-country" title="Country">
+            <option value="US">United States</option>
+            <option value="UK">United Kingdom</option>
+            <option value="CA">Canada</option>
+            <option value="AU">Australia</option>
+            <option value="DE">Germany</option>
+            <option value="FR">France</option>
+            <option value="IN">India</option>
+            <option value="GLOBAL">Global</option>
           </select>
-        </div>
-        <div class="sidebar-card" style="flex:1;overflow:hidden">
-          <div class="sb-label">Quick Prompts</div>
-          <div class="sugg-list" id="ciq-sugg"></div>
         </div>
       </div>
+      <!-- Suggestions -->
+      <div class="sugg-row" id="ciq-sugg"></div>
+      <!-- Chat -->
       <div class="ciq-chat">
         <div class="ciq-msgs" id="ciq-msgs"></div>
         <div class="ciq-bar">
           <textarea class="ciq-input" id="ciq-in" rows="1"
-            placeholder="Ask anything about Workday Compensation…"
+            placeholder="Ask anything, e.g. Why isn't a worker in the merit plan?"
             onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();CIQ.send();}"></textarea>
-          <button class="btn btn-primary btn-sm" onclick="CIQ.send()">Send ↑</button>
+          <button class="send-btn" onclick="CIQ.send()" title="Send">↑</button>
         </div>
       </div>
     </div>
@@ -422,7 +944,7 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; 
     <div class="qa-list" id="qa-list"></div>
   </div>
 
-  <!-- TAB 4: SMARTSHEET SYNC -->
+  <!-- TAB 4: EXPORT -->
   <div id="tab-sync" class="tab-panel">
     <div id="ss-root"></div>
   </div>
@@ -433,21 +955,52 @@ hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; 
 
 <script>
 /* ─── UTILS ──────────────────────────────────────────────────────── */
-function showTab(name, btn) {
+let _tabIdx = 0;
+
+function showTab(name, idx, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   btn.classList.add('active');
+  _tabIdx = idx;
+  // Slide the indicator
+  const ind = document.getElementById('tab-indicator');
+  const track = document.getElementById('tab-track');
+  // indicator width = 25% minus the 2px left offset; shift = idx * (track inner width / 4)
+  const trackW = track.offsetWidth - 4; // subtract 2px left + 2px right padding
+  const slotW = trackW / 4;
+  ind.style.width = slotW + 'px';
+  ind.style.transform = `translateX(${idx * slotW}px)`;
+
   if (name === 'ciq') CIQ.refreshSugg();
 }
+
 function toast(m) {
   const t = document.getElementById('toast');
-  t.textContent = m; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2400);
+  t.textContent = m;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
+
 function copy(text, label) {
   navigator.clipboard.writeText(text).then(() => toast('✓ ' + (label || 'Copied!')));
 }
+
+// Init indicator on load
+window.addEventListener('load', () => {
+  const ind = document.getElementById('tab-indicator');
+  const track = document.getElementById('tab-track');
+  const slotW = (track.offsetWidth - 4) / 4;
+  ind.style.width = slotW + 'px';
+});
+
+window.addEventListener('resize', () => {
+  const ind = document.getElementById('tab-indicator');
+  const track = document.getElementById('tab-track');
+  const slotW = (track.offsetWidth - 4) / 4;
+  ind.style.width = slotW + 'px';
+  ind.style.transform = `translateX(${_tabIdx * slotW}px)`;
+});
 
 /* ─── SOLUTION FINDER ────────────────────────────────────────────── */
 const SF = {
@@ -463,12 +1016,12 @@ const SF = {
   ],
 
   topicsByRole: {
-    'client-admin':   ['Merit cycle not opening','EIB load failed','Worker not eligible for plan','Grade profile pay range missing','OTP not appearing in payroll','Compa ratio showing 0 or blank','Cannot approve compensation change','Currency not converting correctly','Security access issue for manager','Bonus target not calculating'],
-    'consultant':     ['Grade profile design & structure','Merit plan configuration','Eligibility rule logic & testing','EIB template setup & validation','Bonus plan structure','Allowance plan configuration','Security role assignment strategy','Review period & lock date setup','Compensation package design','Integration mapping to payroll'],
-    'analyst':        ['Compensation plan requirements gathering','Grade structure documentation','Eligibility rule mapping','Integration data element mapping','Reporting requirements for comp cycle','UAT test script for merit cycle','Change reason matrix documentation','Compensation decision log template'],
-    'comp-manager':   ['Budget management & tracking','Approval chain configuration','Merit cycle oversight & monitoring','Incentive payout processing','Equity plan review','Off-cycle compensation changes','Comp partner access & security','Compa ratio analysis across org'],
-    'integrator':     ['Payroll integration element mapping','Compensation extract configuration','EIB validation error resolution','Change reason to payroll code mapping','Real-time integration vs batch approach','Compensation EIB template for payroll'],
-    'pm':             ['Comp module go-live readiness checklist','UAT test script generation','Configuration migration approach','Cutover plan for compensation','Risk log for comp workstream','Weekly status narrative for steering co']
+    'client-admin':  ['Merit cycle not opening','EIB load failed','Worker not eligible for plan','Grade profile pay range missing','OTP not appearing in payroll','Compa ratio showing 0 or blank','Cannot approve compensation change','Currency not converting correctly','Security access issue for manager','Bonus target not calculating'],
+    'consultant':    ['Grade profile design & structure','Merit plan configuration','Eligibility rule logic & testing','EIB template setup & validation','Bonus plan structure','Allowance plan configuration','Security role assignment strategy','Review period & lock date setup','Compensation package design','Integration mapping to payroll'],
+    'analyst':       ['Compensation plan requirements gathering','Grade structure documentation','Eligibility rule mapping','Integration data element mapping','Reporting requirements for comp cycle','UAT test script for merit cycle','Change reason matrix documentation','Compensation decision log template'],
+    'comp-manager':  ['Budget management & tracking','Approval chain configuration','Merit cycle oversight & monitoring','Incentive payout processing','Equity plan review','Off-cycle compensation changes','Comp partner access & security','Compa ratio analysis across org'],
+    'integrator':    ['Payroll integration element mapping','Compensation extract configuration','EIB validation error resolution','Change reason to payroll code mapping','Real-time integration vs batch approach','Compensation EIB template for payroll'],
+    'pm':            ['Comp module go-live readiness checklist','UAT test script generation','Configuration migration approach','Cutover plan for compensation','Risk log for comp workstream','Weekly status narrative for steering co']
   },
 
   countries: ['US','UK','CA','AU','DE','FR','IN','SG','Global'],
@@ -481,52 +1034,54 @@ const SF = {
   render() {
     const el = document.getElementById('sf-root');
     if (this.step === 1) {
-      el.innerHTML = `<div class="card" style="max-width:580px;margin:0 auto">
-        <div class="step-dots">${[1,2,3].map(i=>`<div class="dot ${i===1?'active':''}"></div>`).join('')}</div>
-        <div class="step-label"><strong>Step 1 of 3</strong> — Who are you?</div>
-        <div class="choice-grid">
-          ${this.roles.map(r=>`<button class="choice-card ${this.role===r.id?'selected':''}" onclick="SF.pick1('${r.id}')">
-            <span class="ci">${r.icon}</span>
-            <div class="cl">${r.label}</div>
-            <div class="cd">${r.desc}</div>
-          </button>`).join('')}
-        </div>
-        <div style="margin-top:20px;text-align:right">
-          <button class="btn btn-primary" onclick="SF.next()" ${!this.role?'disabled':''}>Next →</button>
-        </div>
-      </div>`;
+      el.innerHTML = `
+        <div class="card" style="max-width:560px;margin:0 auto">
+          <div class="step-dots">${[1,2,3].map(i=>`<div class="dot ${i===1?'active':''}"></div>`).join('')}</div>
+          <div class="step-label"><strong>Step 1 of 3</strong> — Who are you?</div>
+          <div class="choice-grid stagger-in">
+            ${this.roles.map(r=>`<button class="choice-card ${this.role===r.id?'selected':''}" onclick="SF.pick1('${r.id}')">
+              <span class="ci">${r.icon}</span>
+              <div class="ct"><div class="cl">${r.label}</div><div class="cd">${r.desc}</div></div>
+            </button>`).join('')}
+          </div>
+          <div style="margin-top:20px;text-align:right">
+            <button class="btn btn-primary" onclick="SF.next()" ${!this.role?'disabled':''}>Continue →</button>
+          </div>
+        </div>`;
     } else if (this.step === 2) {
       const topics = this.topicsByRole[this.role] || [];
-      el.innerHTML = `<div class="card" style="max-width:580px;margin:0 auto">
-        <div class="step-dots">${[1,2,3].map(i=>`<div class="dot ${i===1?'done':i===2?'active':''}"></div>`).join('')}</div>
-        <div class="step-label"><strong>Step 2 of 3</strong> — What's the issue?</div>
-        <div class="topic-grid">
-          ${topics.map(t=>`<button class="topic-chip ${this.topic===t?'selected':''}" onclick="SF.pick2(this,'${t.replace(/'/g,"\\'")}')">${t}</button>`).join('')}
-        </div>
-        <div style="margin-top:20px;display:flex;justify-content:space-between">
-          <button class="btn btn-ghost" onclick="SF.back()">← Back</button>
-          <button class="btn btn-primary" onclick="SF.next()" ${!this.topic?'disabled':''}>Next →</button>
-        </div>
-      </div>`;
+      el.innerHTML = `
+        <div class="card" style="max-width:560px;margin:0 auto">
+          <div class="step-dots">${[1,2,3].map(i=>`<div class="dot ${i===1?'done':i===2?'active':''}"></div>`).join('')}</div>
+          <div class="step-label"><strong>Step 2 of 3</strong> — What's the issue?</div>
+          <div class="topic-grid stagger-in">
+            ${topics.map(t=>`<button class="topic-chip ${this.topic===t?'selected':''}" onclick="SF.pick2(this,'${t.replace(/'/g,"\\'")}')">${t}</button>`).join('')}
+          </div>
+          <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center">
+            <button class="btn btn-ghost" onclick="SF.back()">← Back</button>
+            <button class="btn btn-primary" onclick="SF.next()" ${!this.topic?'disabled':''}>Continue →</button>
+          </div>
+        </div>`;
     } else {
-      el.innerHTML = `<div class="card" style="max-width:580px;margin:0 auto">
-        <div class="step-dots">${[1,2,3].map(i=>`<div class="dot ${i<3?'done':'active'}"></div>`).join('')}</div>
-        <div class="step-label"><strong>Step 3 of 3</strong> — Refine &amp; launch</div>
-        <div style="margin-bottom:14px">
-          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);display:block;margin-bottom:6px">Country / Region</label>
-          <select onchange="SF.country=this.value" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;width:180px;font-family:inherit">
-            ${this.countries.map(c=>`<option value="${c}" ${this.country===c?'selected':''}>${c}</option>`).join('')}
-          </select>
-        </div>
-        <div style="margin-bottom:18px">
-          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);display:block;margin-bottom:6px">Your Question</label>
-          <textarea id="sf-q" style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;font-family:inherit;resize:vertical;min-height:80px;line-height:1.5">${this.topic}</textarea>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <button class="btn btn-ghost" onclick="SF.back()">← Back</button>
-          <button class="btn btn-primary" onclick="SF.launch()">🤖 Open in Compensation IQ →</button>
-        </div>
-      </div>`;
+      el.innerHTML = `
+        <div class="card" style="max-width:560px;margin:0 auto">
+          <div class="step-dots">${[1,2,3].map(i=>`<div class="dot ${i<3?'done':'active'}"></div>`).join('')}</div>
+          <div class="step-label"><strong>Step 3 of 3</strong> — Refine &amp; launch</div>
+          <div style="margin-bottom:14px">
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);display:block;margin-bottom:7px">Country / Region</label>
+            <select onchange="SF.country=this.value" style="padding:9px 13px;border-radius:10px;border:1.5px solid var(--separator);font-size:13px;width:200px;font-family:inherit;background:var(--fill-2);color:var(--text)">
+              ${this.countries.map(c=>`<option value="${c}" ${this.country===c?'selected':''}>${c}</option>`).join('')}
+            </select>
+          </div>
+          <div style="margin-bottom:18px">
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-3);display:block;margin-bottom:7px">Your Question</label>
+            <textarea id="sf-q" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--separator);font-size:13.5px;font-family:inherit;resize:vertical;min-height:80px;line-height:1.5;background:var(--fill-2);color:var(--text);transition:border-color .15s" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--separator)'">${this.topic}</textarea>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <button class="btn btn-ghost" onclick="SF.back()">← Back</button>
+            <button class="btn btn-primary" onclick="SF.launch()">🤖 Open in Ask tab →</button>
+          </div>
+        </div>`;
     }
   },
 
@@ -538,10 +1093,8 @@ const SF = {
   launch() {
     const q = (document.getElementById('sf-q').value || '').trim();
     if (!q) return;
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-ciq').classList.add('active');
-    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    const askBtn = document.querySelectorAll('.tab-btn')[1];
+    showTab('ciq', 1, askBtn);
     CIQ.post(this.buildPrompt(q));
   }
 };
@@ -552,12 +1105,12 @@ const CIQ = {
     'grade profile': {
       title: 'Grade Profile — Troubleshooting',
       steps: [
-        'Go to <strong>Compensation &gt; Maintain &gt; Compensation Grade Profiles</strong>',
+        'Go to <strong>Compensation › Maintain › Compensation Grade Profiles</strong>',
         'Verify the profile is <strong>Active</strong> with a valid effective date',
         'Confirm pay range segments exist: Minimum, Midpoint, Maximum',
         'Check currency matches the worker\'s location currency',
         'Confirm the profile is linked to the correct <strong>Compensation Grade</strong>',
-        'Test: <em>Find Worker &gt; Compensation &gt; Current Compensation &gt; Grade Profile</em>'
+        'Test: <em>Find Worker › Compensation › Current Compensation › Grade Profile</em>'
       ],
       errors: ['⚠ "Grade Profile not found" → grade is not linked to this profile','⚠ "No pay range" → segments not configured or wrong currency','⚠ "Compa ratio = 0" → midpoint value is missing'],
       tip: '💡 Always clone an existing active grade profile — it preserves currency settings and segment structure.'
@@ -567,7 +1120,7 @@ const CIQ = {
       steps: [
         'Download the correct <strong>Compensation EIB Template</strong> from Community',
         'Required columns: Employee ID, Effective Date, Comp Element, Amount, Currency, Reason',
-        'Upload via <strong>EIB &gt; Import Data</strong> — select correct integration template',
+        'Upload via <strong>EIB › Import Data</strong> — select correct integration template',
         'Run <strong>Validate</strong> first — do not load without validation passing',
         'Fix all row-level errors shown in the validation report',
         'Run <strong>Load</strong> and review the output report for warnings',
@@ -581,7 +1134,7 @@ const CIQ = {
       steps: [
         'Open the compensation plan and navigate to <strong>Eligibility Rules</strong>',
         'Review each condition in the Condition Builder — check Include vs. Exclude logic',
-        'Test directly via <strong>Maintain Compensation Eligibility &gt; Test Eligibility</strong>',
+        'Test directly via <strong>Maintain Compensation Eligibility › Test Eligibility</strong>',
         'Verify the worker\'s Job Profile, Job Family, and Location match the criteria',
         'Confirm the effective date of the rule is not later than the worker\'s hire date',
         'For nested conditions, test each branch separately in sandbox'
@@ -592,7 +1145,7 @@ const CIQ = {
     'merit': {
       title: 'Merit Cycle — Configuration',
       steps: [
-        'Create <strong>Review Period</strong> (Compensation &gt; Maintain &gt; Review Periods)',
+        'Create <strong>Review Period</strong> (Compensation › Maintain › Review Periods)',
         'Set Start/End dates and the <strong>Merit Increase Effective Date</strong>',
         'Create or clone the <strong>Merit Plan</strong> — assign the review period',
         'Configure budget groups and assign amounts or percentages',
@@ -606,13 +1159,13 @@ const CIQ = {
     'otp': {
       title: 'One-Time Payment (OTP) — Processing',
       steps: [
-        'Worker &gt; <strong>Actions &gt; Compensation &gt; Request One-Time Payment</strong>',
+        'Worker › <strong>Actions › Compensation › Request One-Time Payment</strong>',
         'Select the correct OTP <strong>Compensation Plan</strong>',
         'Enter amount, currency, and effective date',
         'Choose <strong>Compensation Change Reason</strong> (must be mapped to payroll code)',
         'Route for approval per configured business process',
         'After final approval, payroll picks up the payment for next cycle',
-        'Verify in <strong>Compensation &gt; Payment History</strong> after payroll run'
+        'Verify in <strong>Compensation › Payment History</strong> after payroll run'
       ],
       errors: ['⚠ "Plan not available" → OTP plan not in worker\'s compensation package','⚠ "Change reason not mapped" → payroll integration missing the reason code','⚠ "Payment not in payroll" → check integration schedule and effective date'],
       tip: '💡 Coordinate with your payroll integration lead — change reason must map to a payroll earning code or the OTP will not process.'
@@ -620,7 +1173,7 @@ const CIQ = {
     'bonus': {
       title: 'Bonus Plan — Configuration',
       steps: [
-        'Create under <strong>Compensation &gt; Maintain &gt; Bonus Plans</strong>',
+        'Create under <strong>Compensation › Maintain › Bonus Plans</strong>',
         'Set plan type, payout frequency, and target percentage',
         'Configure Individual Performance Modifier if applicable',
         'Set "Include in Target Total Compensation" — drives offer letter visibility',
@@ -633,7 +1186,7 @@ const CIQ = {
     'allowance': {
       title: 'Allowance Plan — Setup',
       steps: [
-        'Create under <strong>Compensation &gt; Maintain &gt; Allowance Plans</strong>',
+        'Create under <strong>Compensation › Maintain › Allowance Plans</strong>',
         'Set calculation method: fixed amount or % of base salary',
         'Set frequency — must align with payroll period to avoid rounding errors',
         'Configure currency (create country-specific variants for multi-country)',
@@ -648,7 +1201,7 @@ const CIQ = {
         '<strong>Compensation Administrator</strong> → full config and process access',
         '<strong>Compensation Partner</strong> → constrained to their supervisory org hierarchy',
         '<strong>Manager (Self-Service)</strong> → merit worksheet and OTP requests only',
-        'Assign: <strong>Worker &gt; Actions &gt; Security &gt; Assign Roles</strong>',
+        'Assign: <strong>Worker › Actions › Security › Assign Roles</strong>',
         'For Comp Partners: use Constrained Security Group tied to supervisory org',
         'Test by simulating the user\'s access or via "View As" simulation'
       ],
@@ -675,7 +1228,7 @@ const CIQ = {
         'Confirm worker base salary currency matches grade profile currency',
         '<strong>Compa Ratio</strong> = Worker Base Salary ÷ Midpoint × 100',
         '<strong>Range Penetration</strong> = (Salary − Min) ÷ (Max − Min) × 100',
-        'View: <em>Worker &gt; Compensation &gt; Compensation Summary</em>'
+        'View: <em>Worker › Compensation › Compensation Summary</em>'
       ],
       errors: ['⚠ "Compa ratio = 0 or N/A" → midpoint is missing from grade profile','⚠ "Range penetration blank" → Min/Max segments not configured'],
       tip: '💡 Run the Compensation Audit Report before every merit cycle launch to identify workers with compa ratios outside expected range.'
@@ -705,37 +1258,39 @@ const CIQ = {
 
   buildHtml(r, mode) {
     let html = `<h4>${r.title}</h4>`;
-    const steps = mode === 'quick' ? r.steps.slice(0,3) : r.steps;
-    html += `<ol class="qa-steps" style="margin-top:9px">${steps.map(s=>`<li>${s}</li>`).join('')}</ol>`;
+    const steps = mode === 'quick' ? r.steps.slice(0, 3) : r.steps;
+    html += `<ol style="padding-left:18px;margin-top:9px">${steps.map(s => `<li style="margin-bottom:4px;font-size:13px;">${s}</li>`).join('')}</ol>`;
     if (r.errors.length && mode !== 'quick') {
-      html += `<div class="errs" style="margin-top:10px">${r.errors.join('<br>')}</div>`;
+      html += `<div class="errs">${r.errors.join('<br>')}</div>`;
     }
     if (r.tip) html += `<div class="tip">${r.tip}</div>`;
-    if (mode === 'quick') html += `<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">Switch to Step-by-Step or Deep Dive mode for full details + error codes.</div>`;
+    if (mode === 'quick') html += `<p style="margin-top:8px;font-size:12px;color:var(--text-3)">Switch to Step-by-Step for full details + error codes.</p>`;
     return html;
   },
 
   defaultHtml() {
-    return `<h4>Workday Compensation IQ 👋</h4>
-      <p style="margin-top:6px;line-height:1.6">Ask me anything about Workday Compensation. I cover: grade profiles, EIB loads, eligibility rules, merit cycles, OTPs, bonus/allowance plans, security roles, currency, and compa ratios.</p>
-      <div class="tip">💡 Use the <strong>Solution Finder</strong> tab to build a targeted question and launch it here pre-populated.</div>`;
+    return `<h4>👋 Hi! What do you need help with?</h4>
+      <p style="margin-top:7px;line-height:1.7;font-size:13.5px">Ask me any Workday Compensation question in plain English — I'll give you the steps to fix it.</p>
+      <p style="margin-top:8px;font-size:13px;color:var(--text-2)">Try: <em>"Why isn't a worker showing in the merit plan?"</em> or <em>"How do I fix an EIB load error?"</em></p>
+      <div class="tip">💡 Or tap <strong>🧭 Find</strong> to answer 3 quick questions and I'll build the perfect prompt for you.</div>`;
   },
 
   addMsg(role, html) {
     const el = document.getElementById('ciq-msgs');
     const d = document.createElement('div');
     d.className = 'msg ' + role;
-    d.innerHTML = `<div class="msg-av">${role==='user'?'👤':'🤖'}</div><div class="msg-bub">${html}</div>`;
+    d.innerHTML = `<div class="msg-av">${role === 'user' ? '👤' : '🤖'}</div><div class="bubble">${html}</div>`;
     el.appendChild(d);
-    el.scrollTop = el.scrollHeight;
+    requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
   },
 
   addTyping() {
     const el = document.getElementById('ciq-msgs');
     const d = document.createElement('div');
     d.className = 'msg ai'; d.id = 'ciq-typing';
-    d.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bub"><div class="typing"><span></span><span></span><span></span></div></div>`;
-    el.appendChild(d); el.scrollTop = el.scrollHeight;
+    d.innerHTML = `<div class="msg-av">🤖</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
   },
 
   removeTyping() {
@@ -759,29 +1314,30 @@ const CIQ = {
       this.removeTyping();
       const r = this.find(text);
       this.addMsg('ai', r ? this.buildHtml(r, mode) : this.defaultHtml());
-    }, 500 + Math.random() * 300);
+    }, 480 + Math.random() * 280);
   },
 
   refreshSugg() {
     const suggs = [
-      'Why is a worker not eligible for merit?',
-      'EIB load showing validation error',
-      'Grade profile pay range is missing',
-      'OTP not appearing in payroll',
-      'Bonus target not calculating correctly',
-      'Compa ratio showing 0 or blank'
+      'Worker not in merit plan',
+      'EIB load validation error',
+      'Grade profile missing',
+      'OTP not in payroll',
+      'Bonus target is 0',
+      'Compa ratio shows 0'
     ];
-    document.getElementById('ciq-sugg').innerHTML = suggs.map(s =>
-      `<button class="sugg-btn" onclick="CIQ.post('${s.replace(/'/g,"\\'")}')">${s}</button>`
-    ).join('');
+    document.getElementById('ciq-sugg').innerHTML =
+      `<span class="sugg-label">Try →</span>` +
+      suggs.map(s =>
+        `<button class="sugg-btn" onclick="CIQ.post('${s.replace(/'/g, "\\'")}')">${s}</button>`
+      ).join('');
   },
 
   init() {
     this.addMsg('ai', this.defaultHtml());
     this.refreshSugg();
-    // Auto-resize textarea
     const inp = document.getElementById('ciq-in');
-    if (inp) inp.addEventListener('input', function() {
+    if (inp) inp.addEventListener('input', function () {
       this.style.height = 'auto';
       this.style.height = Math.min(this.scrollHeight, 120) + 'px';
     });
@@ -791,23 +1347,22 @@ const CIQ = {
 /* ─── Q&A REFERENCE ─────────────────────────────────────────────── */
 const QA = {
   filter: 'all',
-  cats: { all:'All Topics', config:'Configuration', eib:'EIB', trouble:'Troubleshoot', security:'Security', process:'Process' },
-  bc:   { config:'badge-config', eib:'badge-eib', trouble:'badge-trouble', security:'badge-security', process:'badge-process' },
+  cats: { all: 'All Topics', config: '⚙️ Setup', eib: '📤 Data Loads', trouble: '🔧 Fix Issues', security: '🔐 Security', process: '✅ Process' },
+  bc:   { config: 'badge-config', eib: 'badge-eib', trouble: 'badge-trouble', security: 'badge-security', process: 'badge-process' },
 
   data: [
     { id:1,  cat:'config',   title:'Grade Profile Configuration',
       desc:'Set up and maintain compensation grade profiles, pay range segments, and midpoints.',
-      steps:['Go to <strong>Compensation &gt; Maintain &gt; Compensation Grade Profiles</strong>','Click <strong>Create Compensation Grade Profile</strong> or clone an existing one','Set an effective date and link to the appropriate <strong>Compensation Grade</strong>','Add segments: Minimum, Midpoint, Maximum (and any custom percentiles)','Set currency for each segment — must match worker\'s location currency','Activate the profile and test via a sample worker'],
-      tip:'Clone an existing profile whenever possible — it preserves currency settings and segment structure.',
-      err:null },
+      steps:['Go to <strong>Compensation › Maintain › Compensation Grade Profiles</strong>','Click <strong>Create Compensation Grade Profile</strong> or clone an existing one','Set an effective date and link to the appropriate <strong>Compensation Grade</strong>','Add segments: Minimum, Midpoint, Maximum (and any custom percentiles)','Set currency for each segment — must match worker\'s location currency','Activate the profile and test via a sample worker'],
+      tip:'Clone an existing profile whenever possible — it preserves currency settings and segment structure.', err:null },
     { id:2,  cat:'eib',      title:'EIB Load — Compensation Updates',
       desc:'Bulk-update compensation records using Workday\'s Enterprise Interface Builder.',
-      steps:['Download the <strong>Compensation EIB Template</strong> (Community &gt; Tools &gt; EIB Templates)','Required columns: Employee ID, Effective Date, Comp Element, Amount, Currency, Reason','Upload via <strong>EIB &gt; Import Data</strong> — select correct integration template','Run <strong>Validate</strong> first — resolve all row-level errors before loading','Run <strong>Load</strong> and review the output report for warnings as well as errors','Spot-check 5–10 worker records to confirm updates applied correctly'],
+      steps:['Download the <strong>Compensation EIB Template</strong> (Community › Tools › EIB Templates)','Required columns: Employee ID, Effective Date, Comp Element, Amount, Currency, Reason','Upload via <strong>EIB › Import Data</strong> — select correct integration template','Run <strong>Validate</strong> first — resolve all row-level errors before loading','Run <strong>Load</strong> and review the output report for warnings as well as errors','Spot-check 5–10 worker records to confirm updates applied correctly'],
       tip:'Run in sandbox first. Confirm date format matches tenant settings (MM/DD/YYYY vs DD/MM/YYYY).',
       err:'"Compensation not updated" → lock period active; "Worker not eligible" → plan eligibility not met' },
     { id:3,  cat:'config',   title:'Eligibility Rules',
       desc:'Configure and troubleshoot compensation plan eligibility rules and conditions.',
-      steps:['Open the compensation plan and navigate to <strong>Eligibility Rules</strong>','Review each condition: Job Family, Location, Employment Type, etc.','Test via <strong>Maintain Compensation Eligibility &gt; Test Eligibility</strong>','Check include vs. exclude logic — a single incorrect exclude can remove all workers','Verify effective dates on both the rule and the worker record','For nested conditions, test each branch separately in sandbox'],
+      steps:['Open the compensation plan and navigate to <strong>Eligibility Rules</strong>','Review each condition: Job Family, Location, Employment Type, etc.','Test via <strong>Maintain Compensation Eligibility › Test Eligibility</strong>','Check include vs. exclude logic — a single incorrect exclude can remove all workers','Verify effective dates on both the rule and the worker record','For nested conditions, test each branch separately in sandbox'],
       tip:'Use the built-in "Test Eligibility" function on the rule — it shows exactly which condition failed.',
       err:'"No eligible workers" → check AND/OR logic in condition builder' },
     { id:4,  cat:'process',  title:'Merit Cycle Setup',
@@ -817,24 +1372,22 @@ const QA = {
       err:'"Merit plan not showing" → worker not eligible for the linked compensation plan' },
     { id:5,  cat:'process',  title:'One-Time Payment (OTP) Processing',
       desc:'Process spot bonuses, referral payments, and other one-time awards.',
-      steps:['Worker &gt; <strong>Actions &gt; Compensation &gt; Request One-Time Payment</strong>','Select the correct OTP compensation plan','Enter amount, currency, effective date','Choose <strong>Compensation Change Reason</strong> — must be mapped to a payroll code','Route for approval per configured business process','After final approval, payroll picks up the payment for next cycle','Verify in <strong>Compensation &gt; Payment History</strong> after payroll run'],
+      steps:['Worker › <strong>Actions › Compensation › Request One-Time Payment</strong>','Select the correct OTP compensation plan','Enter amount, currency, effective date','Choose <strong>Compensation Change Reason</strong> — must be mapped to a payroll code','Route for approval per configured business process','After final approval, payroll picks up the payment for next cycle','Verify in <strong>Compensation › Payment History</strong> after payroll run'],
       tip:'Confirm change reason is mapped to a payroll earning code — without this mapping, the payment will not appear in payroll.',
       err:'"Plan not available" → OTP plan not assigned to worker\'s compensation package' },
     { id:6,  cat:'config',   title:'Allowance Plan Configuration',
       desc:'Set up fixed or calculated allowances (car, housing, transport, shift premium).',
-      steps:['Create under <strong>Compensation &gt; Maintain &gt; Allowance Plans</strong>','Set calculation method: fixed amount or % of base salary','Set frequency — must align with payroll period','Configure currency (create country variants for multi-country tenants)','Assign eligibility rule','Add to worker compensation package or via EIB for bulk assignment'],
-      tip:'Create separate plans per country for location-specific allowances (UK car allowance, France transport indemnity).',
-      err:null },
+      steps:['Create under <strong>Compensation › Maintain › Allowance Plans</strong>','Set calculation method: fixed amount or % of base salary','Set frequency — must align with payroll period','Configure currency (create country variants for multi-country tenants)','Assign eligibility rule','Add to worker compensation package or via EIB for bulk assignment'],
+      tip:'Create separate plans per country for location-specific allowances (UK car allowance, France transport indemnity).', err:null },
     { id:7,  cat:'config',   title:'Bonus Plan Structure',
       desc:'Configure annual, quarterly, or discretionary bonus plans.',
-      steps:['Create under <strong>Compensation &gt; Maintain &gt; Bonus Plans</strong>','Set plan type, payout frequency, and target percentage','Configure Individual Performance Modifier if applicable','Set "Include in Target Total Compensation" flag','Assign eligibility rule','Process payout via <strong>Process Bonus</strong> business process'],
+      steps:['Create under <strong>Compensation › Maintain › Bonus Plans</strong>','Set plan type, payout frequency, and target percentage','Configure Individual Performance Modifier if applicable','Set "Include in Target Total Compensation" flag','Assign eligibility rule','Process payout via <strong>Process Bonus</strong> business process'],
       tip:'Confirm with client whether bonus target should appear in offer letters — "Include in TTC" flag drives this and is commonly missed.',
       err:'"Target not calculating" → check "Include in TTC" flag; "Payout not triggered" → process not initiated for payout period' },
     { id:8,  cat:'config',   title:'Stock / Equity Plans',
       desc:'Configure RSU, stock option, and ESPP compensation plans.',
-      steps:['Create under <strong>Compensation &gt; Maintain &gt; Stock Plans</strong>','Set plan type: RSU, Stock Option, or ESPP','Configure grant basis (% of salary, fixed units, or discretionary)','Set vesting schedule','Grant awards via EIB for bulk grants','Coordinate with equity admin system (Shareworks, Carta, E*TRADE) for valuation sync'],
-      tip:'RSU and stock option processes differ significantly in Workday — confirm plan type with client before configuration.',
-      err:null },
+      steps:['Create under <strong>Compensation › Maintain › Stock Plans</strong>','Set plan type: RSU, Stock Option, or ESPP','Configure grant basis (% of salary, fixed units, or discretionary)','Set vesting schedule','Grant awards via EIB for bulk grants','Coordinate with equity admin system (Shareworks, Carta, E*TRADE) for valuation sync'],
+      tip:'RSU and stock option processes differ significantly in Workday — confirm plan type with client before configuration.', err:null },
     { id:9,  cat:'config',   title:'Compensation Grade Structure',
       desc:'Design and maintain the grade hierarchy that links to job profiles.',
       steps:['Create <strong>Compensation Grades</strong> within the appropriate structure','Link each grade to a <strong>Compensation Grade Profile</strong> (pay range)','Assign grades to <strong>Job Profiles</strong> via the job profile definition','One grade can link to multiple profiles for different regions/currencies','Test the full chain: Job Profile → Grade → Grade Profile → Pay Range'],
@@ -843,16 +1396,14 @@ const QA = {
     { id:10, cat:'config',   title:'Merit Plan — Budget Configuration',
       desc:'Configure merit budget groups and merit matrices for performance-based increases.',
       steps:['Link merit plan to review period','Set budget calculation: % of eligible salary (recommended) or flat amount','Configure budget groups (country, division, cost centre)','Set up merit matrix if performance-based increases are used','Verify matrix effective date aligns with review period start','Test matrix calculations with sample workers in sandbox'],
-      tip:'A common error is the merit matrix effective date being after the merit increase effective date — this silently drops the matrix.',
-      err:null },
+      tip:'A common error is the merit matrix effective date being after the merit increase effective date — this silently drops the matrix.', err:null },
     { id:11, cat:'config',   title:'Compensation Plan — Core Setup',
       desc:'Build and configure the core compensation plan structure.',
-      steps:['Create under <strong>Compensation &gt; Maintain &gt; Compensation Plans</strong>','Select plan type (Salary, Hourly, Period Salary, Allowance, Bonus, Stock)','Set frequency and currency','Configure effective date and active status','Link to compensation packages for worker assignment'],
-      tip:'Plan type drives both reporting and payroll integration — confirm with the integration team before creating new plan types.',
-      err:null },
+      steps:['Create under <strong>Compensation › Maintain › Compensation Plans</strong>','Select plan type (Salary, Hourly, Period Salary, Allowance, Bonus, Stock)','Set frequency and currency','Configure effective date and active status','Link to compensation packages for worker assignment'],
+      tip:'Plan type drives both reporting and payroll integration — confirm with the integration team before creating new plan types.', err:null },
     { id:12, cat:'security', title:'Security Roles for Compensation',
       desc:'Assign and troubleshoot compensation security roles for admins, partners, and managers.',
-      steps:['<strong>Compensation Administrator</strong> → full config and process access','<strong>Compensation Partner</strong> → constrained to supervisory org hierarchy','<strong>HR Partner</strong> → typically read access to compensation data','<strong>Manager (Self-Service)</strong> → merit worksheet and OTP requests','Assign: <strong>Worker &gt; Actions &gt; Security &gt; Assign Roles</strong>','For Comp Partners: use Constrained Security Group linked to supervisory org','Test using "View As" simulation or a test user account'],
+      steps:['<strong>Compensation Administrator</strong> → full config and process access','<strong>Compensation Partner</strong> → constrained to supervisory org hierarchy','<strong>HR Partner</strong> → typically read access to compensation data','<strong>Manager (Self-Service)</strong> → merit worksheet and OTP requests','Assign: <strong>Worker › Actions › Security › Assign Roles</strong>','For Comp Partners: use Constrained Security Group linked to supervisory org','Test using "View As" simulation or a test user account'],
       tip:'Comp Partners must always be constrained to their org — unconstrained access is the #1 compensation security audit finding.',
       err:'"Cannot view merit worksheet" → manager not assigned self-service comp role; "Partner sees all workers" → security group not constrained' },
     { id:13, cat:'config',   title:'Currency Exchange Rates',
@@ -862,30 +1413,28 @@ const QA = {
       err:'"No rate found for period" → rate table has a gap; "Currency mismatch" → plan vs worker location currency not aligned' },
     { id:14, cat:'process',  title:'Compensation Reporting & Analytics',
       desc:'Run and customise compensation reports for cycle oversight and audit.',
-      steps:['Use <strong>Compensation Audit Report</strong> for bulk compa ratio review','Use <strong>Compensation Review Summary</strong> for merit cycle progress tracking','Custom reports: <strong>Reports &gt; Create Custom Report</strong> from Compensation domain','Add calculated fields for specialised metrics (e.g., salary increase %)','Schedule reports via <strong>Schedule Report</strong> for regular delivery','Use <strong>Workday Adaptive Planning</strong> for advanced analytics if licensed'],
-      tip:'Run the Compensation Audit Report before every merit cycle launch to identify workers outside expected compa ratio range.',
-      err:null },
+      steps:['Use <strong>Compensation Audit Report</strong> for bulk compa ratio review','Use <strong>Compensation Review Summary</strong> for merit cycle progress tracking','Custom reports: <strong>Reports › Create Custom Report</strong> from Compensation domain','Add calculated fields for specialised metrics (e.g., salary increase %)','Schedule reports via <strong>Schedule Report</strong> for regular delivery','Use <strong>Workday Adaptive Planning</strong> for advanced analytics if licensed'],
+      tip:'Run the Compensation Audit Report before every merit cycle launch to identify workers outside expected compa ratio range.', err:null },
     { id:15, cat:'process',  title:'Payroll Integration',
       desc:'Map compensation elements to payroll codes and troubleshoot integration issues.',
-      steps:['Map each compensation plan to a payroll element code','Map compensation change reasons to payroll action/reason codes','Configure the compensation extract integration (EIB or API)','Test in sandbox with a full payroll run','Schedule the extract to run before the payroll close date','Monitor via <strong>Integration &gt; Monitor Integration</strong>'],
+      steps:['Map each compensation plan to a payroll element code','Map compensation change reasons to payroll action/reason codes','Configure the compensation extract integration (EIB or API)','Test in sandbox with a full payroll run','Schedule the extract to run before the payroll close date','Monitor via <strong>Integration › Monitor Integration</strong>'],
       tip:'Every change reason used in compensation must be mapped in the payroll integration — missing mappings are the #1 source of payroll errors.',
       err:'"Payment not in payroll" → change reason not mapped; "Wrong amount" → frequency mismatch between comp plan and payroll period' },
     { id:16, cat:'config',   title:'Compensation Change Reasons',
       desc:'Create and manage compensation change reasons and event types.',
-      steps:['Navigate to <strong>Compensation &gt; Maintain &gt; Compensation Change Reasons</strong>','Create reason with descriptive name (e.g., "Promotion — Salary Increase")','Map to the correct <strong>Compensation Event Type</strong>','Set availability: which processes can use this reason','Coordinate with integration team on payroll code mapping','Document all reasons in a change reason matrix for client handover'],
-      tip:'Align change reasons with the payroll integration team before go-live — adding new reasons post-go-live requires integration changes.',
-      err:null },
+      steps:['Navigate to <strong>Compensation › Maintain › Compensation Change Reasons</strong>','Create reason with descriptive name (e.g., "Promotion — Salary Increase")','Map to the correct <strong>Compensation Event Type</strong>','Set availability: which processes can use this reason','Coordinate with integration team on payroll code mapping','Document all reasons in a change reason matrix for client handover'],
+      tip:'Align change reasons with the payroll integration team before go-live — adding new reasons post-go-live requires integration changes.', err:null },
     { id:17, cat:'trouble',  title:'Compa Ratio & Range Penetration',
       desc:'Troubleshoot compa ratio and range penetration calculation issues.',
-      steps:['Verify worker has an active <strong>Grade Profile Assignment</strong>','Confirm grade profile has a <strong>Midpoint</strong> value (not 0 or blank)','Confirm worker base salary currency matches grade profile currency','<strong>Compa Ratio</strong> = Worker Base Salary ÷ Midpoint × 100','<strong>Range Penetration</strong> = (Salary − Min) ÷ (Max − Min) × 100','View: <em>Worker &gt; Compensation &gt; Compensation Summary</em>'],
+      steps:['Verify worker has an active <strong>Grade Profile Assignment</strong>','Confirm grade profile has a <strong>Midpoint</strong> value (not 0 or blank)','Confirm worker base salary currency matches grade profile currency','<strong>Compa Ratio</strong> = Worker Base Salary ÷ Midpoint × 100','<strong>Range Penetration</strong> = (Salary − Min) ÷ (Max − Min) × 100','View: <em>Worker › Compensation › Compensation Summary</em>'],
       tip:'Run the Compensation Audit Report to bulk-check all compa ratios before merit cycle launch.',
       err:'"Compa ratio = 0 or N/A" → midpoint missing from grade profile; "Range penetration blank" → Min/Max segments not configured' }
   ],
 
   render() {
     const fEl = document.getElementById('qa-filters');
-    fEl.innerHTML = Object.entries(this.cats).map(([k,v]) =>
-      `<button class="fchip ${this.filter===k?'on':''}" onclick="QA.setFilter('${k}')">${v}</button>`
+    fEl.innerHTML = Object.entries(this.cats).map(([k, v]) =>
+      `<button class="fchip ${this.filter === k ? 'on' : ''}" onclick="QA.setFilter('${k}')">${v}</button>`
     ).join('');
 
     const items = this.filter === 'all' ? this.data : this.data.filter(d => d.cat === this.filter);
@@ -893,7 +1442,7 @@ const QA = {
       <div class="qa-card" id="qc-${t.id}">
         <div class="qa-head" onclick="QA.toggle(${t.id})">
           <div class="hl">
-            <span class="badge ${this.bc[t.cat]}">${this.cats[t.cat]}</span>
+            <span class="badge ${this.bc[t.cat]}">${this.cats[t.cat].replace(/^[^\s]+\s/, '')}</span>
             <span class="qa-title">${t.title}</span>
           </div>
           <span class="chev">▼</span>
@@ -901,18 +1450,21 @@ const QA = {
         <div class="qa-body">
           <div class="qa-desc">${t.desc}</div>
           <div class="qa-sec-label">Steps</div>
-          <ol class="qa-steps">${t.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
-          ${t.tip  ? `<div class="qa-tip">💡 ${t.tip}</div>` : ''}
-          ${t.err  ? `<div class="qa-err">⚠ Common errors: ${t.err}</div>` : ''}
+          <ol class="qa-steps">${t.steps.map(s => `<li>${s}</li>`).join('')}</ol>
+          ${t.tip ? `<div class="qa-tip">💡 ${t.tip}</div>` : ''}
+          ${t.err ? `<div class="qa-err">⚠ Common errors: ${t.err}</div>` : ''}
         </div>
       </div>`).join('');
   },
 
   setFilter(f) { this.filter = f; this.render(); },
-  toggle(id)   { document.getElementById('qc-'+id).classList.toggle('open'); }
+  toggle(id) {
+    const card = document.getElementById('qc-' + id);
+    card.classList.toggle('open');
+  }
 };
 
-/* ─── SMARTSHEET SYNC ────────────────────────────────────────────── */
+/* ─── SMARTSHEET SYNC / EXPORT ───────────────────────────────────── */
 const SS = {
   prompt: `You are a Workday Compensation expert. I will give you data from multiple Smartsheet trackers. Analyse and return structured insights.
 
@@ -953,88 +1505,86 @@ Write a 3-paragraph executive status update for a steering committee:
 Format: Use headers for each task. Be specific — reference actual items from the data.`,
 
   schemas: [
-    { name:'Compensation Configuration Tracker', status:'ready',
-      cols:[
-        { col:'Config Item',       type:'Text',        note:'e.g., Grade Profile — US Salaried' },
-        { col:'Module',            type:'Dropdown',    note:'Merit, Bonus, Allowance, OTP, Stock' },
-        { col:'Status',            type:'Dropdown',    note:'Not Started, In Progress, Complete, Blocked' },
-        { col:'Owner',             type:'Contact',     note:'Accenture or Client team member' },
-        { col:'Due Date',          type:'Date',        note:'Target completion date' },
-        { col:'Go-Live Impact',    type:'Dropdown',    note:'Critical, High, Medium, Low' },
-        { col:'Notes / Blockers',  type:'Text',        note:'Freeform — dependencies, blockers' }
+    { name: 'Compensation Configuration Tracker', status: 'ready',
+      cols: [
+        { col: 'Config Item',       type: 'Text',        note: 'e.g., Grade Profile — US Salaried' },
+        { col: 'Module',            type: 'Dropdown',    note: 'Merit, Bonus, Allowance, OTP, Stock' },
+        { col: 'Status',            type: 'Dropdown',    note: 'Not Started, In Progress, Complete, Blocked' },
+        { col: 'Owner',             type: 'Contact',     note: 'Accenture or Client team member' },
+        { col: 'Due Date',          type: 'Date',        note: 'Target completion date' },
+        { col: 'Go-Live Impact',    type: 'Dropdown',    note: 'Critical, High, Medium, Low' },
+        { col: 'Notes / Blockers',  type: 'Text',        note: 'Freeform — dependencies, blockers' }
       ]},
-    { name:'RAID Log', status:'ready',
-      cols:[
-        { col:'ID',                type:'Auto-number', note:'Auto-generated' },
-        { col:'Type',              type:'Dropdown',    note:'Risk, Action, Issue, Decision' },
-        { col:'Description',       type:'Text',        note:'Full description of the item' },
-        { col:'Probability',       type:'Dropdown',    note:'High, Medium, Low (Risks only)' },
-        { col:'Impact',            type:'Dropdown',    note:'High, Medium, Low' },
-        { col:'Mitigation / Resolution', type:'Text',  note:'Current action being taken' },
-        { col:'Owner',             type:'Contact',     note:'' },
-        { col:'Due Date',          type:'Date',        note:'' },
-        { col:'Status',            type:'Dropdown',    note:'Open, In Progress, Closed' }
+    { name: 'RAID Log', status: 'ready',
+      cols: [
+        { col: 'ID',                type: 'Auto-number', note: 'Auto-generated' },
+        { col: 'Type',              type: 'Dropdown',    note: 'Risk, Action, Issue, Decision' },
+        { col: 'Description',       type: 'Text',        note: 'Full description of the item' },
+        { col: 'Probability',       type: 'Dropdown',    note: 'High, Medium, Low (Risks only)' },
+        { col: 'Impact',            type: 'Dropdown',    note: 'High, Medium, Low' },
+        { col: 'Mitigation / Resolution', type: 'Text', note: 'Current action being taken' },
+        { col: 'Owner',             type: 'Contact',     note: '' },
+        { col: 'Due Date',          type: 'Date',        note: '' },
+        { col: 'Status',            type: 'Dropdown',    note: 'Open, In Progress, Closed' }
       ]},
-    { name:'EIB Error Tracker', status:'needs-data',
-      cols:[
-        { col:'Load Date',         type:'Date',        note:'' },
-        { col:'EIB Name',          type:'Text',        note:'e.g., Merit Update — US Q2 2025' },
-        { col:'Total Rows',        type:'Number',      note:'' },
-        { col:'Error Count',       type:'Number',      note:'' },
-        { col:'Error Description', type:'Text',        note:'Paste from load report' },
-        { col:'Root Cause',        type:'Text',        note:'' },
-        { col:'Resolution',        type:'Text',        note:'' },
-        { col:'Status',            type:'Dropdown',    note:'Open, Resolved, Waived' }
+    { name: 'EIB Error Tracker', status: 'needs-data',
+      cols: [
+        { col: 'Load Date',         type: 'Date',        note: '' },
+        { col: 'EIB Name',          type: 'Text',        note: 'e.g., Merit Update — US Q2 2025' },
+        { col: 'Total Rows',        type: 'Number',      note: '' },
+        { col: 'Error Count',       type: 'Number',      note: '' },
+        { col: 'Error Description', type: 'Text',        note: 'Paste from load report' },
+        { col: 'Root Cause',        type: 'Text',        note: '' },
+        { col: 'Resolution',        type: 'Text',        note: '' },
+        { col: 'Status',            type: 'Dropdown',    note: 'Open, Resolved, Waived' }
       ]},
-    { name:'Decisions Log', status:'pending',
-      cols:[
-        { col:'Date Raised',       type:'Date',        note:'' },
-        { col:'Decision Topic',    type:'Text',        note:'' },
-        { col:'Options Presented', type:'Text',        note:'' },
-        { col:'Decision Made',     type:'Text',        note:'' },
-        { col:'Decided By',        type:'Contact',     note:'' },
-        { col:'Workday Impact',    type:'Text',        note:'' },
-        { col:'Status',            type:'Dropdown',    note:'Open, Decided, Deferred' }
+    { name: 'Decisions Log', status: 'pending',
+      cols: [
+        { col: 'Date Raised',       type: 'Date',        note: '' },
+        { col: 'Decision Topic',    type: 'Text',        note: '' },
+        { col: 'Options Presented', type: 'Text',        note: '' },
+        { col: 'Decision Made',     type: 'Text',        note: '' },
+        { col: 'Decided By',        type: 'Contact',     note: '' },
+        { col: 'Workday Impact',    type: 'Text',        note: '' },
+        { col: 'Status',            type: 'Dropdown',    note: 'Open, Decided, Deferred' }
       ]}
   ],
 
-  statusLabel: { ready:'Ready for analysis', 'needs-data':'Needs data', pending:'Pending setup' },
-  statusDot:   { ready:'s-green', 'needs-data':'s-orange', pending:'s-grey' },
+  statusLabel: { ready: 'Ready for analysis', 'needs-data': 'Needs data', pending: 'Pending setup' },
+  statusDot:   { ready: 's-green', 'needs-data': 's-orange', pending: 's-grey' },
 
   render() {
     const el = document.getElementById('ss-root');
     el.innerHTML = `
-      <!-- PROMPT -->
-      <div class="card">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px">
+      <!-- DARK PROMPT CARD -->
+      <div class="prompt-card">
+        <div class="prompt-card-header">
           <div>
-            <div class="sec-title">Batch Claude Prompt Template</div>
-            <div class="sec-sub">Copy this into Claude and paste your Smartsheet data below it. Claude will analyse gaps, surface risks, and write your status update automatically.</div>
+            <h2>📋 Batch Claude Prompt</h2>
+            <p>Copy this prompt, paste your Smartsheet data below it, then send to Claude.<br>It will find gaps, flag risks, and write your weekly status update.</p>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="copy(SS.prompt,'Prompt copied!')">📋 Copy Prompt</button>
+          <button class="btn btn-secondary btn-sm" onclick="copy(SS.prompt,'Prompt copied!')" style="flex-shrink:0;margin-top:4px">📋 Copy</button>
         </div>
-        <div class="ss-prompt-box">${this.prompt}</div>
+        <div class="prompt-code">${this.prompt.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
       </div>
 
-      <!-- SCHEMAS -->
+      <!-- SCHEMA CARD -->
       <div class="card">
         <div class="sec-title">Sheet Schemas</div>
         <div class="sec-sub">Column definitions for each Smartsheet tracker. Use these when setting up new sheets or auditing existing ones.</div>
-        ${this.schemas.map((s,i) => `
+        ${this.schemas.map((s, i) => `
           ${i > 0 ? '<hr class="divider">' : ''}
           <div class="sheet-header">
-            <strong style="font-size:14px">${s.name}</strong>
-            <span style="font-size:12px;color:var(--text-muted)">
-              <span class="sdot ${this.statusDot[s.status]}"></span>${this.statusLabel[s.status]}
-            </span>
+            <strong>${s.name}</strong>
+            <span class="sheet-status"><span class="sdot ${this.statusDot[s.status]}"></span>${this.statusLabel[s.status]}</span>
           </div>
           <table class="schema-tbl">
             <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
-            <tbody>${s.cols.map(c=>`<tr><td><strong>${c.col}</strong></td><td style="color:var(--text-muted)">${c.type}</td><td style="color:var(--text-muted)">${c.note}</td></tr>`).join('')}</tbody>
+            <tbody>${s.cols.map(c => `<tr><td><strong>${c.col}</strong></td><td style="color:var(--text-2)">${c.type}</td><td style="color:var(--text-2)">${c.note}</td></tr>`).join('')}</tbody>
           </table>`).join('')}
       </div>
 
-      <!-- STATUS -->
+      <!-- STATUS CARD -->
       <div class="card">
         <div class="sec-title">Sync Status</div>
         <table class="schema-tbl">
@@ -1047,8 +1597,8 @@ Format: Use headers for each task. Be specific — reference actual items from t
           </tbody>
         </table>
         <div class="info-box">
-          💡 <strong>Workflow:</strong> Copy the batch prompt → open Claude → paste prompt → paste your Smartsheet data below → send. No API key needed — this is manual batch analysis.
-          <br><br>🔁 <strong>Once Power Automate flows are live</strong>, the Q&amp;A Reference and submission forms will sync directly. Use Settings ⚙ in the Skills Hub to add your webhook URLs.
+          💡 <strong>Workflow:</strong> Copy the batch prompt → open Claude → paste prompt → paste your Smartsheet data below → send. No API key needed — manual batch analysis.<br><br>
+          🔁 <strong>Once Power Automate flows are live</strong>, the Q&amp;A Reference and submission forms will sync directly. Use Settings ⚙️ in the Skills Hub to add your webhook URLs.
         </div>
       </div>`;
   }
