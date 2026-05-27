@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CompIQ Architect — Accenture Workday Compensation</title>
+<style>
+/* ─── RESET ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #EEECf4; color: #1a1a2e; min-height: 100vh; }
+
+:root {
+  --purple: #2D1B69;
+  --purple-mid: #4527A0;
+  --purple-light: #EDE7F6;
+  --accent: #7C4DFF;
+  --green: #00897B;
+  --green-light: #E0F2F1;
+  --orange: #E65100;
+  --text: #1a1a2e;
+  --text-muted: #6B7280;
+  --border: #E5E7EB;
+  --card: #FFFFFF;
+  --radius: 14px;
+  --shadow: 0 2px 14px rgba(45,27,105,0.09);
+}
+
+/* ─── HEADER ─── */
+.app-header {
+  background: var(--purple);
+  color: white;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.28);
+}
+.header-icon {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.14);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.header-titles h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+.header-titles p { font-size: 11px; opacity: 0.6; margin-top: 1px; }
+.header-badge {
+  margin-left: auto;
+  background: rgba(124,77,255,0.35);
+  border: 1px solid rgba(124,77,255,0.5);
+  color: #D8CCFF;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+
+/* ─── TABS ─── */
+.tab-bar {
+  background: var(--purple);
+  padding: 0 20px;
+  display: flex; gap: 2px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.tab-btn {
+  background: none; border: none;
+  color: rgba(255,255,255,0.55);
+  padding: 12px 18px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.9); }
+.tab-btn.active { color: white; border-bottom-color: #7C4DFF; }
+
+/* ─── LAYOUT ─── */
+.main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+/* ─── BUTTONS ─── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; border: none; font-family: inherit;
+  transition: all 0.18s;
+}
+.btn-primary { background: var(--purple); color: white; }
+.btn-primary:hover { background: var(--purple-mid); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,27,105,0.25); }
+.btn-secondary { background: var(--purple-light); color: var(--purple); }
+.btn-secondary:hover { background: #DDD6F5; }
+.btn-ghost { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+.btn-ghost:hover { background: #F5F4FB; }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+.btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+/* ─── BADGES ─── */
+.badge {
+  display: inline-block; padding: 3px 9px;
+  border-radius: 20px; font-size: 11px;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.badge-config   { background: #EDE7F6; color: #4527A0; }
+.badge-eib      { background: #E3F2FD; color: #1565C0; }
+.badge-trouble  { background: #FFF3E0; color: #BF360C; }
+.badge-security { background: #FCE4EC; color: #880E4F; }
+.badge-process  { background: #E8F5E9; color: #1B5E20; }
+
+/* ─── STEP INDICATOR ─── */
+.step-dots { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #DDD; transition: all 0.25s; }
+.dot.active { background: var(--purple); transform: scale(1.4); }
+.dot.done { background: var(--green); }
+.step-label { text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+.step-label strong { color: var(--text); }
+
+/* ─── CHOICE GRID ─── */
+.choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.choice-card {
+  background: white; border: 2px solid var(--border);
+  border-radius: 12px; padding: 18px;
+  cursor: pointer; transition: all 0.18s; text-align: left;
+}
+.choice-card:hover { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,77,255,0.1); }
+.choice-card.selected { border-color: var(--accent); background: #F6F0FF; }
+.choice-card .ci { font-size: 26px; margin-bottom: 8px; display: block; }
+.choice-card .cl { font-weight: 700; font-size: 14px; }
+.choice-card .cd { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+/* ─── TOPIC CHIPS ─── */
+.topic-grid { display: flex; flex-wrap: wrap; gap: 9px; }
+.topic-chip {
+  padding: 9px 15px; border-radius: 10px;
+  border: 2px solid var(--border); background: white;
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  transition: all 0.18s; font-family: inherit;
+}
+.topic-chip:hover { border-color: var(--accent); }
+.topic-chip.selected { border-color: var(--accent); background: #F6F0FF; color: var(--purple); font-weight: 600; }
+
+/* ─── CIQ LAYOUT ─── */
+.ciq-wrap {
+  display: grid;
+  grid-template-columns: 215px 1fr;
+  gap: 14px;
+  height: calc(100vh - 168px);
+  min-height: 520px;
+}
+.ciq-sidebar { display: flex; flex-direction: column; gap: 10px; }
+.sidebar-card {
+  background: white; border-radius: 12px;
+  padding: 14px; border: 1px solid var(--border);
+}
+.sb-label {
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--text-muted); margin-bottom: 8px;
+}
+.sb-select {
+  width: 100%; padding: 8px 10px;
+  border-radius: 8px; border: 1.5px solid var(--border);
+  font-size: 13px; background: white; color: var(--text);
+  cursor: pointer; font-family: inherit;
+}
+.sb-select:focus { outline: none; border-color: var(--accent); }
+.sugg-list { display: flex; flex-direction: column; gap: 5px; }
+.sugg-btn {
+  background: var(--purple-light); border: none;
+  border-radius: 8px; padding: 8px 10px;
+  font-size: 11px; color: var(--purple);
+  cursor: pointer; text-align: left;
+  transition: background 0.15s; font-family: inherit; line-height: 1.4;
+}
+.sugg-btn:hover { background: #DDD6F5; }
+
+/* ─── CIQ CHAT ─── */
+.ciq-chat {
+  display: flex; flex-direction: column;
+  background: white; border-radius: 12px;
+  border: 1px solid var(--border); overflow: hidden;
+}
+.ciq-msgs {
+  flex: 1; overflow-y: auto; padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  scroll-behavior: smooth;
+}
+.msg { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp 0.28s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
+.msg.user { flex-direction: row-reverse; }
+.msg-av {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.msg.user .msg-av { background: var(--purple); }
+.msg.ai   .msg-av { background: var(--purple-light); }
+.msg-bub {
+  max-width: 78%; padding: 13px 16px;
+  border-radius: 16px; font-size: 13.5px; line-height: 1.65;
+}
+.msg.user .msg-bub { background: var(--purple); color: white; border-bottom-right-radius: 4px; }
+.msg.ai   .msg-bub { background: #F8F6FD; border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+.msg-bub h4 { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.msg-bub ol, .msg-bub ul { padding-left: 18px; margin-top: 8px; }
+.msg-bub li { margin-bottom: 4px; font-size: 13px; }
+.msg-bub .tip {
+  margin-top: 10px; padding: 8px 12px;
+  background: var(--green-light); border-radius: 8px;
+  font-size: 12px; color: #1B5E20;
+}
+.msg-bub .errs { margin-top: 8px; font-size: 12px; color: var(--orange); }
+
+.ciq-bar {
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  display: flex; gap: 9px; align-items: flex-end;
+}
+.ciq-input {
+  flex: 1; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 13px; resize: none; font-family: inherit;
+  min-height: 42px; max-height: 120px;
+  transition: border-color 0.18s;
+  line-height: 1.5;
+}
+.ciq-input:focus { outline: none; border-color: var(--accent); }
+
+/* ─── TYPING INDICATOR ─── */
+.typing { display: flex; gap: 4px; align-items: center; padding: 14px 16px; }
+.typing span {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--text-muted); animation: bounce 1.2s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+
+/* ─── Q&A ─── */
+.filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.fchip {
+  padding: 7px 14px; border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: white; cursor: pointer;
+  font-size: 12px; font-weight: 600;
+  transition: all 0.15s; font-family: inherit;
+}
+.fchip:hover { border-color: var(--accent); }
+.fchip.on { background: var(--purple); color: white; border-color: var(--purple); }
+.qa-list { display: flex; flex-direction: column; gap: 10px; }
+.qa-card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+.qa-head {
+  padding: 15px 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: background 0.12s;
+}
+.qa-head:hover { background: #FAFAFA; }
+.qa-head .hl { display: flex; align-items: center; gap: 11px; }
+.qa-title { font-weight: 600; font-size: 14px; }
+.qa-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border); }
+.qa-card.open .qa-body { display: block; }
+.qa-desc { font-size: 13px; color: var(--text-muted); margin-top: 12px; margin-bottom: 14px; }
+.qa-sec-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 7px;
+}
+.qa-steps { padding-left: 20px; }
+.qa-steps li { font-size: 13px; line-height: 1.7; }
+.qa-tip { background: var(--green-light); border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #1B5E20; margin-top: 10px; }
+.qa-err { background: #FFF3E0; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--orange); margin-top: 10px; }
+.chev { transition: transform 0.2s; color: var(--text-muted); font-size: 12px; }
+.qa-card.open .chev { transform: rotate(180deg); }
+
+/* ─── SMARTSHEET SYNC ─── */
+.ss-prompt-box {
+  background: #1a0533; color: #DDCEFF;
+  border-radius: 12px; padding: 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px; line-height: 1.75;
+  white-space: pre-wrap; word-break: break-word;
+  max-height: 230px; overflow-y: auto;
+}
+.schema-tbl { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 4px; }
+.schema-tbl th {
+  background: #F8F6FD; padding: 8px 12px;
+  text-align: left; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-muted); border-bottom: 1px solid var(--border);
+}
+.schema-tbl td { padding: 9px 12px; border-bottom: 1px solid #F0EEF8; vertical-align: top; }
+.schema-tbl tr:last-child td { border-bottom: none; }
+.sdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.s-green { background: #00897B; }
+.s-orange { background: #F57C00; }
+.s-grey { background: #9E9E9E; }
+.sheet-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.info-box {
+  padding: 14px 16px; border-radius: 10px;
+  background: #F5F0FF; font-size: 13px; color: var(--purple);
+  margin-top: 14px;
+}
+
+/* ─── SECTION LABEL ─── */
+.sec-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 14px;
+}
+.sec-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+hr.divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: #1a1a2e; color: white;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  transform: translateY(80px); transition: transform 0.25s;
+  z-index: 999; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.toast.show { transform: translateY(0); }
+
+@media (max-width: 660px) {
+  .ciq-wrap { grid-template-columns: 1fr; height: auto; }
+  .choice-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="header-icon">🏗️</div>
+  <div class="header-titles">
+    <h1>CompIQ Architect</h1>
+    <p>Accenture · Workday Compensation · T-Mobile PxQ</p>
+  </div>
+  <div class="header-badge">Workday Comp</div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('finder',this)">🧭 Solution Finder</button>
+  <button class="tab-btn" onclick="showTab('ciq',this)">🤖 Compensation IQ</button>
+  <button class="tab-btn" onclick="showTab('qa',this)">📚 Q&amp;A Reference</button>
+  <button class="tab-btn" onclick="showTab('sync',this)">📊 Smartsheet Sync</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TAB 1: SOLUTION FINDER -->
+  <div id="tab-finder" class="tab-panel active">
+    <div id="sf-root"></div>
+  </div>
+
+  <!-- TAB 2: COMPENSATION IQ -->
+  <div id="tab-ciq" class="tab-panel">
+    <div class="ciq-wrap">
+      <div class="ciq-sidebar">
+        <div class="sidebar-card">
+          <div class="sb-label">Your Role</div>
+          <select class="sb-select" id="ciq-role">
+            <option value="consultant">Workday Consultant</option>
+            <option value="client">Client HR Admin</option>
+            <option value="analyst">Business Analyst</option>
+            <option value="manager">Comp Manager</option>
+            <option value="integrator">Integration Lead</option>
+          </select>
+        </div>
+        <div class="sidebar-card">
+          <div class="sb-label">Response Mode</div>
+          <select class="sb-select" id="ciq-mode">
+            <option value="quick">⚡ Quick Answer</option>
+            <option value="steps">📋 Step-by-Step</option>
+            <option value="deep">🔬 Deep Dive</option>
+          </select>
+        </div>
+        <div class="sidebar-card">
+          <div class="sb-label">Country / Region</div>
+          <select class="sb-select" id="ciq-country">
+            <option value="US">🇺🇸 United States</option>
+            <option value="UK">🇬🇧 United Kingdom</option>
+            <option value="CA">🇨🇦 Canada</option>
+            <option value="AU">🇦🇺 Australia</option>
+            <option value="DE">🇩🇪 Germany</option>
+            <option value="FR">🇫🇷 France</option>
+            <option value="IN">🇮🇳 India</option>
+            <option value="GLOBAL">🌍 Global</option>
+          </select>
+        </div>
+        <div class="sidebar-card" style="flex:1;overflow:hidden">
+          <div class="sb-label">Quick Prompts</div>
+          <div class="sugg-list" id="ciq-sugg"></div>
+        </div>
+      </div>
+      <div class="ciq-chat">
+        <div class="ciq-msgs" id="ciq-msgs"></div>
+        <div class="ciq-bar">
+          <textarea class="ciq-input" id="ciq-in" rows="1"
+            placeholder="Ask anything about Workday Compensation…"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();CIQ.send();}"></textarea>
+          <button class="btn btn-primary btn-sm" onclick="CIQ.send()">Send ↑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: Q&A REFERENCE -->
+  <div id="tab-qa" class="tab-panel">
+    <div class="filter-row" id="qa-filters"></div>
+    <div class="qa-list" id="qa-list"></div>
+  </div>
+
+  <!-- TAB 4: SMARTSHEET SYNC -->
+  <div id="tab-sync" class="tab-panel">
+    <div id="ss-root"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── UTILS ──────────────────────────────────────────────────────── */
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'ciq') CIQ.refreshSugg();
+}
+function toast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+function copy(text, label) {
+  navigator.clipboard.writeText(text).then(() => toast('✓ ' + (label || 'Copied!')));
+}
+
+/* ─── SOLUTION FINDER ────────────────────────────────────────────── */
+const SF = {
+  step: 1, role: null, topic: null, country: 'US',
+
+  roles: [
+    { id:'client-admin',  icon:'👤', label:'Client HR Admin',    desc:'Day-to-day Workday admin tasks' },
+    { id:'consultant',    icon:'🏗️', label:'Workday Consultant',  desc:'Configuration & implementation' },
+    { id:'analyst',       icon:'📊', label:'Business Analyst',    desc:'Requirements & documentation' },
+    { id:'comp-manager',  icon:'💼', label:'Comp Manager',        desc:'Cycle management & approvals' },
+    { id:'integrator',    icon:'🔗', label:'Integration Lead',    desc:'Payroll & system connections' },
+    { id:'pm',            icon:'📋', label:'Project Manager',     desc:'Workstream oversight & delivery' }
+  ],
+
+  topicsByRole: {
+    'client-admin':   ['Merit cycle not opening','EIB load failed','Worker not eligible for plan','Grade profile pay range missing','OTP not appearing in payroll','Compa ratio showing 0 or blank','Cannot approve compensation change','Currency not converting correctly','Security access issue for manager','Bonus target not calculating'],
+    'consultant':     ['Grade profile design & structure','Merit plan configuration','Eligibility rule logic & testing','EIB template setup & validation','Bonus plan structure','Allowance plan configuration','Security role assignment strategy','Review period & lock date setup','Compensation package design','Integration mapping to payroll'],
+    'analyst':        ['Compensation plan requirements gathering','Grade structure documentation','Eligibility rule mapping','Integration data element mapping','Reporting requirements for comp cycle','UAT test script for merit cycle','Change reason matrix documentation','Compensation decision log template'],
+    'comp-manager':   ['Budget management & tracking','Approval chain configuration','Merit cycle oversight & monitoring','Incentive payout processing','Equity plan review','Off-cycle compensation changes','Comp partner access & security','Compa ratio analysis across org'],
+    'integrator':     ['Payroll integration element mapping','Compensation extract configuration','EIB validation error resolution','Change reason to payroll code mapping','Real-time integration vs batch approach','Compensation EIB template for payroll'],
+    'pm':             ['Comp module go-live readiness checklist','UAT test script generation','Configuration migration approach','Cutover plan for compensation','Risk log for comp workstream','Weekly status narrative for steering co']
+  },
+
+  countries: ['US','UK','CA','AU','DE','FR','IN','SG','Global'],
+
+  buildPrompt(q) {
+    const roleMap = { 'client-admin':'Client HR Admin','consultant':'Workday Consultant','analyst':'Business Analyst','comp-manager':'Comp Manager','integrator':'Integration Lead','pm':'Project Manager' };
+    return `[Context: ${roleMap[this.role] || this.role} | Country: ${this.country}]\n\n${q}`;
+  },
+
+  render() {
+    const el = document.getElementById('sf-root');
+    if (this.step === 1) {
+      el.innerHTML = `<div class="card" style="max-width:580px;margin:0 auto">
+        <div class="step-dots">${[1,2,3].map(i=>`<div class="dot ${i===1?'active':''}"></div>`).join('')}</div>
+        <div class="step-label"><strong>Step 1 of 3</strong> — Who are you?</div>
+        <div class="choice-grid">
+          ${this.roles.map(r=>`<button class="choice-card ${this.role===r.id?'selected':''}" onclick="SF.pick1('${r.id}')">
+            <span class="ci">${r.icon}</span>
+            <div class="cl">${r.label}</div>
+            <div class="cd">${r.desc}</div>
+          </button>`).join('')}
+        </div>
+        <div style="margin-top:20px;text-align:right">
+          <button class="btn btn-primary" onclick="SF.next()" ${!this.role?'disabled':''}>Next →</button>
+        </div>
+      </div>`;
+    } else if (this.step === 2) {
+      const topics = this.topicsByRole[this.role] || [];
+      el.innerHTML = `<div class="card" style="max-width:580px;margin:0 auto">
+        <div class="step-dots">${[1,2,3].map(i=>`<div class="dot ${i===1?'done':i===2?'active':''}"></div>`).join('')}</div>
+        <div class="step-label"><strong>Step 2 of 3</strong> — What's the issue?</div>
+        <div class="topic-grid">
+          ${topics.map(t=>`<button class="topic-chip ${this.topic===t?'selected':''}" onclick="SF.pick2(this,'${t.replace(/'/g,"\\'")}')">${t}</button>`).join('')}
+        </div>
+        <div style="margin-top:20px;display:flex;justify-content:space-between">
+          <button class="btn btn-ghost" onclick="SF.back()">← Back</button>
+          <button class="btn btn-primary" onclick="SF.next()" ${!this.topic?'disabled':''}>Next →</button>
+        </div>
+      </div>`;
+    } else {
+      el.innerHTML = `<div class="card" style="max-width:580px;margin:0 auto">
+        <div class="step-dots">${[1,2,3].map(i=>`<div class="dot ${i<3?'done':'active'}"></div>`).join('')}</div>
+        <div class="step-label"><strong>Step 3 of 3</strong> — Refine &amp; launch</div>
+        <div style="margin-bottom:14px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);display:block;margin-bottom:6px">Country / Region</label>
+          <select onchange="SF.country=this.value" style="padding:8px 12px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;width:180px;font-family:inherit">
+            ${this.countries.map(c=>`<option value="${c}" ${this.country===c?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div style="margin-bottom:18px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);display:block;margin-bottom:6px">Your Question</label>
+          <textarea id="sf-q" style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--border);font-size:13px;font-family:inherit;resize:vertical;min-height:80px;line-height:1.5">${this.topic}</textarea>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <button class="btn btn-ghost" onclick="SF.back()">← Back</button>
+          <button class="btn btn-primary" onclick="SF.launch()">🤖 Open in Compensation IQ →</button>
+        </div>
+      </div>`;
+    }
+  },
+
+  pick1(id)    { this.role = id; this.topic = null; this.render(); },
+  pick2(el, t) { this.topic = t; this.render(); },
+  back()       { if (this.step > 1) { this.step--; this.render(); } },
+  next()       { if (this.step < 3) { this.step++; this.render(); } },
+
+  launch() {
+    const q = (document.getElementById('sf-q').value || '').trim();
+    if (!q) return;
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-ciq').classList.add('active');
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    CIQ.post(this.buildPrompt(q));
+  }
+};
+
+/* ─── COMPENSATION IQ ────────────────────────────────────────────── */
+const CIQ = {
+  kb: {
+    'grade profile': {
+      title: 'Grade Profile — Troubleshooting',
+      steps: [
+        'Go to <strong>Compensation &gt; Maintain &gt; Compensation Grade Profiles</strong>',
+        'Verify the profile is <strong>Active</strong> with a valid effective date',
+        'Confirm pay range segments exist: Minimum, Midpoint, Maximum',
+        'Check currency matches the worker\'s location currency',
+        'Confirm the profile is linked to the correct <strong>Compensation Grade</strong>',
+        'Test: <em>Find Worker &gt; Compensation &gt; Current Compensation &gt; Grade Profile</em>'
+      ],
+      errors: ['⚠ "Grade Profile not found" → grade is not linked to this profile','⚠ "No pay range" → segments not configured or wrong currency','⚠ "Compa ratio = 0" → midpoint value is missing'],
+      tip: '💡 Always clone an existing active grade profile — it preserves currency settings and segment structure.'
+    },
+    'eib': {
+      title: 'EIB Load — Compensation',
+      steps: [
+        'Download the correct <strong>Compensation EIB Template</strong> from Community',
+        'Required columns: Employee ID, Effective Date, Comp Element, Amount, Currency, Reason',
+        'Upload via <strong>EIB &gt; Import Data</strong> — select correct integration template',
+        'Run <strong>Validate</strong> first — do not load without validation passing',
+        'Fix all row-level errors shown in the validation report',
+        'Run <strong>Load</strong> and review the output report for warnings',
+        'Spot-check 5–10 workers to confirm updates applied'
+      ],
+      errors: ['⚠ "Compensation not updated" → lock period active for that review period','⚠ "Worker not eligible" → plan eligibility rule not met','⚠ "Invalid currency" → currency not active in that plan/country'],
+      tip: '💡 Run in sandbox first. Confirm date format matches tenant settings (MM/DD/YYYY vs DD/MM/YYYY).'
+    },
+    'eligibility': {
+      title: 'Eligibility Rule — Troubleshooting',
+      steps: [
+        'Open the compensation plan and navigate to <strong>Eligibility Rules</strong>',
+        'Review each condition in the Condition Builder — check Include vs. Exclude logic',
+        'Test directly via <strong>Maintain Compensation Eligibility &gt; Test Eligibility</strong>',
+        'Verify the worker\'s Job Profile, Job Family, and Location match the criteria',
+        'Confirm the effective date of the rule is not later than the worker\'s hire date',
+        'For nested conditions, test each branch separately in sandbox'
+      ],
+      errors: ['⚠ Worker not in merit plan → check "Include Active Only" flag','⚠ "No eligible workers" → check AND/OR logic in condition builder','⚠ Plan not showing → plan may have a future effective date'],
+      tip: '💡 Use Workday\'s built-in "Test Eligibility" function on the rule — it shows exactly which condition failed.'
+    },
+    'merit': {
+      title: 'Merit Cycle — Configuration',
+      steps: [
+        'Create <strong>Review Period</strong> (Compensation &gt; Maintain &gt; Review Periods)',
+        'Set Start/End dates and the <strong>Merit Increase Effective Date</strong>',
+        'Create or clone the <strong>Merit Plan</strong> — assign the review period',
+        'Configure budget groups and assign amounts or percentages',
+        'Set the <strong>Lock Date</strong> (recommend 48h before submission deadline)',
+        'Initiate via <strong>Start Compensation Review</strong> and distribute to managers',
+        'Monitor via <strong>Compensation Review Process Monitor</strong>'
+      ],
+      errors: ['⚠ "Merit plan not showing" → worker not eligible for the linked comp plan','⚠ "Cannot submit" → lock date has passed or approvals incomplete','⚠ "Budget exceeded" → check hard vs. soft stop configuration'],
+      tip: '💡 Set the lock date 2 days before the deadline — once locked, managers cannot edit and exceptions require admin override.'
+    },
+    'otp': {
+      title: 'One-Time Payment (OTP) — Processing',
+      steps: [
+        'Worker &gt; <strong>Actions &gt; Compensation &gt; Request One-Time Payment</strong>',
+        'Select the correct OTP <strong>Compensation Plan</strong>',
+        'Enter amount, currency, and effective date',
+        'Choose <strong>Compensation Change Reason</strong> (must be mapped to payroll code)',
+        'Route for approval per configured business process',
+        'After final approval, payroll picks up the payment for next cycle',
+        'Verify in <strong>Compensation &gt; Payment History</strong> after payroll run'
+      ],
+      errors: ['⚠ "Plan not available" → OTP plan not in worker\'s compensation package','⚠ "Change reason not mapped" → payroll integration missing the reason code','⚠ "Payment not in payroll" → check integration schedule and effective date'],
+      tip: '💡 Coordinate with your payroll integration lead — change reason must map to a payroll earning code or the OTP will not process.'
+    },
+    'bonus': {
+      title: 'Bonus Plan — Configuration',
+      steps: [
+        'Create under <strong>Compensation &gt; Maintain &gt; Bonus Plans</strong>',
+        'Set plan type, payout frequency, and target percentage',
+        'Configure Individual Performance Modifier if applicable',
+        'Set "Include in Target Total Compensation" — drives offer letter visibility',
+        'Assign eligibility rule',
+        'Process payout via <strong>Process Bonus</strong> business process'
+      ],
+      errors: ['⚠ "Target not calculating" → check "Include in TTC" flag','⚠ "Payout not triggered" → business process for payout period not initiated'],
+      tip: '💡 Confirm with the client whether bonus target should appear in offer letters — "Include in TTC" drives this and is often missed.'
+    },
+    'allowance': {
+      title: 'Allowance Plan — Setup',
+      steps: [
+        'Create under <strong>Compensation &gt; Maintain &gt; Allowance Plans</strong>',
+        'Set calculation method: fixed amount or % of base salary',
+        'Set frequency — must align with payroll period to avoid rounding errors',
+        'Configure currency (create country-specific variants for multi-country)',
+        'Assign eligibility rule and add to worker compensation package'
+      ],
+      errors: [],
+      tip: '💡 For country-specific allowances (UK car allowance, France transport), create separate plans per country with local eligibility rules.'
+    },
+    'security': {
+      title: 'Compensation Security Roles',
+      steps: [
+        '<strong>Compensation Administrator</strong> → full config and process access',
+        '<strong>Compensation Partner</strong> → constrained to their supervisory org hierarchy',
+        '<strong>Manager (Self-Service)</strong> → merit worksheet and OTP requests only',
+        'Assign: <strong>Worker &gt; Actions &gt; Security &gt; Assign Roles</strong>',
+        'For Comp Partners: use Constrained Security Group tied to supervisory org',
+        'Test by simulating the user\'s access or via "View As" simulation'
+      ],
+      errors: ['⚠ "Cannot view merit worksheet" → manager not assigned self-service comp role','⚠ Partner seeing too much data → security group not constrained to org'],
+      tip: '💡 Comp Partners must always be constrained — unconstrained access is the #1 compensation security audit finding.'
+    },
+    'currency': {
+      title: 'Currency Exchange Rate Issues',
+      steps: [
+        'Navigate to <strong>Maintain Currency Conversion Rates</strong>',
+        'Confirm rates exist for the required period and currency pair',
+        'Check the <strong>Rate Type</strong> set on the compensation plan',
+        'Run <strong>Refresh Currency Rates</strong> after loading new rates',
+        'Verify worker location currency matches plan currency settings'
+      ],
+      errors: ['⚠ "No rate found for period" → exchange rate table has a gap for that month/year','⚠ "Currency mismatch" → plan currency vs worker location currency not aligned'],
+      tip: '💡 For tenants with 5+ currencies, set up an automated currency rate feed — manual updates are the most common source of currency errors.'
+    },
+    'compa': {
+      title: 'Compa Ratio & Range Penetration',
+      steps: [
+        'Verify worker has an active <strong>Grade Profile Assignment</strong>',
+        'Confirm grade profile has a <strong>Midpoint</strong> value (not 0 or blank)',
+        'Confirm worker base salary currency matches grade profile currency',
+        '<strong>Compa Ratio</strong> = Worker Base Salary ÷ Midpoint × 100',
+        '<strong>Range Penetration</strong> = (Salary − Min) ÷ (Max − Min) × 100',
+        'View: <em>Worker &gt; Compensation &gt; Compensation Summary</em>'
+      ],
+      errors: ['⚠ "Compa ratio = 0 or N/A" → midpoint is missing from grade profile','⚠ "Range penetration blank" → Min/Max segments not configured'],
+      tip: '💡 Run the Compensation Audit Report before every merit cycle launch to identify workers with compa ratios outside expected range.'
+    }
+  },
+
+  keywords: [
+    [['grade profile','pay range','grade segment','midpoint'],     'grade profile'],
+    [['eib','load','inbound','template load'],                     'eib'],
+    [['eligib','not eligible','eligible','condition builder'],     'eligibility'],
+    [['merit','merit cycle','merit plan','merit worksheet'],       'merit'],
+    [['otp','one-time payment','one time payment','spot bonus'],   'otp'],
+    [['bonus','incentive','variable pay'],                         'bonus'],
+    [['allowance','car allowance','housing'],                      'allowance'],
+    [['security','role','permission','access'],                    'security'],
+    [['currency','exchange rate','conversion'],                    'currency'],
+    [['compa','compa ratio','range penetration'],                  'compa']
+  ],
+
+  find(text) {
+    const t = text.toLowerCase();
+    for (const [kws, key] of this.keywords) {
+      if (kws.some(k => t.includes(k))) return this.kb[key];
+    }
+    return null;
+  },
+
+  buildHtml(r, mode) {
+    let html = `<h4>${r.title}</h4>`;
+    const steps = mode === 'quick' ? r.steps.slice(0,3) : r.steps;
+    html += `<ol class="qa-steps" style="margin-top:9px">${steps.map(s=>`<li>${s}</li>`).join('')}</ol>`;
+    if (r.errors.length && mode !== 'quick') {
+      html += `<div class="errs" style="margin-top:10px">${r.errors.join('<br>')}</div>`;
+    }
+    if (r.tip) html += `<div class="tip">${r.tip}</div>`;
+    if (mode === 'quick') html += `<div style="margin-top:8px;font-size:12px;color:var(--text-muted)">Switch to Step-by-Step or Deep Dive mode for full details + error codes.</div>`;
+    return html;
+  },
+
+  defaultHtml() {
+    return `<h4>Workday Compensation IQ 👋</h4>
+      <p style="margin-top:6px;line-height:1.6">Ask me anything about Workday Compensation. I cover: grade profiles, EIB loads, eligibility rules, merit cycles, OTPs, bonus/allowance plans, security roles, currency, and compa ratios.</p>
+      <div class="tip">💡 Use the <strong>Solution Finder</strong> tab to build a targeted question and launch it here pre-populated.</div>`;
+  },
+
+  addMsg(role, html) {
+    const el = document.getElementById('ciq-msgs');
+    const d = document.createElement('div');
+    d.className = 'msg ' + role;
+    d.innerHTML = `<div class="msg-av">${role==='user'?'👤':'🤖'}</div><div class="msg-bub">${html}</div>`;
+    el.appendChild(d);
+    el.scrollTop = el.scrollHeight;
+  },
+
+  addTyping() {
+    const el = document.getElementById('ciq-msgs');
+    const d = document.createElement('div');
+    d.className = 'msg ai'; d.id = 'ciq-typing';
+    d.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bub"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    el.appendChild(d); el.scrollTop = el.scrollHeight;
+  },
+
+  removeTyping() {
+    const t = document.getElementById('ciq-typing');
+    if (t) t.remove();
+  },
+
+  send() {
+    const inp = document.getElementById('ciq-in');
+    const text = inp.value.trim();
+    if (!text) return;
+    inp.value = ''; inp.style.height = 'auto';
+    this.post(text);
+  },
+
+  post(text) {
+    this.addMsg('user', text);
+    this.addTyping();
+    const mode = document.getElementById('ciq-mode').value;
+    setTimeout(() => {
+      this.removeTyping();
+      const r = this.find(text);
+      this.addMsg('ai', r ? this.buildHtml(r, mode) : this.defaultHtml());
+    }, 500 + Math.random() * 300);
+  },
+
+  refreshSugg() {
+    const suggs = [
+      'Why is a worker not eligible for merit?',
+      'EIB load showing validation error',
+      'Grade profile pay range is missing',
+      'OTP not appearing in payroll',
+      'Bonus target not calculating correctly',
+      'Compa ratio showing 0 or blank'
+    ];
+    document.getElementById('ciq-sugg').innerHTML = suggs.map(s =>
+      `<button class="sugg-btn" onclick="CIQ.post('${s.replace(/'/g,"\\'")}')">${s}</button>`
+    ).join('');
+  },
+
+  init() {
+    this.addMsg('ai', this.defaultHtml());
+    this.refreshSugg();
+    // Auto-resize textarea
+    const inp = document.getElementById('ciq-in');
+    if (inp) inp.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+  }
+};
+
+/* ─── Q&A REFERENCE ─────────────────────────────────────────────── */
+const QA = {
+  filter: 'all',
+  cats: { all:'All Topics', config:'Configuration', eib:'EIB', trouble:'Troubleshoot', security:'Security', process:'Process' },
+  bc:   { config:'badge-config', eib:'badge-eib', trouble:'badge-trouble', security:'badge-security', process:'badge-process' },
+
+  data: [
+    { id:1,  cat:'config',   title:'Grade Profile Configuration',
+      desc:'Set up and maintain compensation grade profiles, pay range segments, and midpoints.',
+      steps:['Go to <strong>Compensation &gt; Maintain &gt; Compensation Grade Profiles</strong>','Click <strong>Create Compensation Grade Profile</strong> or clone an existing one','Set an effective date and link to the appropriate <strong>Compensation Grade</strong>','Add segments: Minimum, Midpoint, Maximum (and any custom percentiles)','Set currency for each segment — must match worker\'s location currency','Activate the profile and test via a sample worker'],
+      tip:'Clone an existing profile whenever possible — it preserves currency settings and segment structure.',
+      err:null },
+    { id:2,  cat:'eib',      title:'EIB Load — Compensation Updates',
+      desc:'Bulk-update compensation records using Workday\'s Enterprise Interface Builder.',
+      steps:['Download the <strong>Compensation EIB Template</strong> (Community &gt; Tools &gt; EIB Templates)','Required columns: Employee ID, Effective Date, Comp Element, Amount, Currency, Reason','Upload via <strong>EIB &gt; Import Data</strong> — select correct integration template','Run <strong>Validate</strong> first — resolve all row-level errors before loading','Run <strong>Load</strong> and review the output report for warnings as well as errors','Spot-check 5–10 worker records to confirm updates applied correctly'],
+      tip:'Run in sandbox first. Confirm date format matches tenant settings (MM/DD/YYYY vs DD/MM/YYYY).',
+      err:'"Compensation not updated" → lock period active; "Worker not eligible" → plan eligibility not met' },
+    { id:3,  cat:'config',   title:'Eligibility Rules',
+      desc:'Configure and troubleshoot compensation plan eligibility rules and conditions.',
+      steps:['Open the compensation plan and navigate to <strong>Eligibility Rules</strong>','Review each condition: Job Family, Location, Employment Type, etc.','Test via <strong>Maintain Compensation Eligibility &gt; Test Eligibility</strong>','Check include vs. exclude logic — a single incorrect exclude can remove all workers','Verify effective dates on both the rule and the worker record','For nested conditions, test each branch separately in sandbox'],
+      tip:'Use the built-in "Test Eligibility" function on the rule — it shows exactly which condition failed.',
+      err:'"No eligible workers" → check AND/OR logic in condition builder' },
+    { id:4,  cat:'process',  title:'Merit Cycle Setup',
+      desc:'Configure and launch the annual or mid-year merit cycle end-to-end.',
+      steps:['Create <strong>Review Period</strong> with correct start/end and merit effective date','Create or clone <strong>Merit Plan</strong> — assign the review period','Configure budget groups: department, manager level, or country','Set budgets as % of eligible salary or flat amount','Set <strong>Lock Date</strong> (48h before deadline recommended)','Initiate via <strong>Start Compensation Review</strong> and distribute to managers','Monitor via <strong>Compensation Review Process Monitor</strong>'],
+      tip:'Set the lock date 2 days before the submission deadline — exceptions after lock require admin override.',
+      err:'"Merit plan not showing" → worker not eligible for the linked compensation plan' },
+    { id:5,  cat:'process',  title:'One-Time Payment (OTP) Processing',
+      desc:'Process spot bonuses, referral payments, and other one-time awards.',
+      steps:['Worker &gt; <strong>Actions &gt; Compensation &gt; Request One-Time Payment</strong>','Select the correct OTP compensation plan','Enter amount, currency, effective date','Choose <strong>Compensation Change Reason</strong> — must be mapped to a payroll code','Route for approval per configured business process','After final approval, payroll picks up the payment for next cycle','Verify in <strong>Compensation &gt; Payment History</strong> after payroll run'],
+      tip:'Confirm change reason is mapped to a payroll earning code — without this mapping, the payment will not appear in payroll.',
+      err:'"Plan not available" → OTP plan not assigned to worker\'s compensation package' },
+    { id:6,  cat:'config',   title:'Allowance Plan Configuration',
+      desc:'Set up fixed or calculated allowances (car, housing, transport, shift premium).',
+      steps:['Create under <strong>Compensation &gt; Maintain &gt; Allowance Plans</strong>','Set calculation method: fixed amount or % of base salary','Set frequency — must align with payroll period','Configure currency (create country variants for multi-country tenants)','Assign eligibility rule','Add to worker compensation package or via EIB for bulk assignment'],
+      tip:'Create separate plans per country for location-specific allowances (UK car allowance, France transport indemnity).',
+      err:null },
+    { id:7,  cat:'config',   title:'Bonus Plan Structure',
+      desc:'Configure annual, quarterly, or discretionary bonus plans.',
+      steps:['Create under <strong>Compensation &gt; Maintain &gt; Bonus Plans</strong>','Set plan type, payout frequency, and target percentage','Configure Individual Performance Modifier if applicable','Set "Include in Target Total Compensation" flag','Assign eligibility rule','Process payout via <strong>Process Bonus</strong> business process'],
+      tip:'Confirm with client whether bonus target should appear in offer letters — "Include in TTC" flag drives this and is commonly missed.',
+      err:'"Target not calculating" → check "Include in TTC" flag; "Payout not triggered" → process not initiated for payout period' },
+    { id:8,  cat:'config',   title:'Stock / Equity Plans',
+      desc:'Configure RSU, stock option, and ESPP compensation plans.',
+      steps:['Create under <strong>Compensation &gt; Maintain &gt; Stock Plans</strong>','Set plan type: RSU, Stock Option, or ESPP','Configure grant basis (% of salary, fixed units, or discretionary)','Set vesting schedule','Grant awards via EIB for bulk grants','Coordinate with equity admin system (Shareworks, Carta, E*TRADE) for valuation sync'],
+      tip:'RSU and stock option processes differ significantly in Workday — confirm plan type with client before configuration.',
+      err:null },
+    { id:9,  cat:'config',   title:'Compensation Grade Structure',
+      desc:'Design and maintain the grade hierarchy that links to job profiles.',
+      steps:['Create <strong>Compensation Grades</strong> within the appropriate structure','Link each grade to a <strong>Compensation Grade Profile</strong> (pay range)','Assign grades to <strong>Job Profiles</strong> via the job profile definition','One grade can link to multiple profiles for different regions/currencies','Test the full chain: Job Profile → Grade → Grade Profile → Pay Range'],
+      tip:'Map the full chain before build: Grade → Profile → Pay Range → Currency. Gaps in this chain cause most compa ratio errors.',
+      err:'"No grade found for worker" → job profile not linked to a compensation grade' },
+    { id:10, cat:'config',   title:'Merit Plan — Budget Configuration',
+      desc:'Configure merit budget groups and merit matrices for performance-based increases.',
+      steps:['Link merit plan to review period','Set budget calculation: % of eligible salary (recommended) or flat amount','Configure budget groups (country, division, cost centre)','Set up merit matrix if performance-based increases are used','Verify matrix effective date aligns with review period start','Test matrix calculations with sample workers in sandbox'],
+      tip:'A common error is the merit matrix effective date being after the merit increase effective date — this silently drops the matrix.',
+      err:null },
+    { id:11, cat:'config',   title:'Compensation Plan — Core Setup',
+      desc:'Build and configure the core compensation plan structure.',
+      steps:['Create under <strong>Compensation &gt; Maintain &gt; Compensation Plans</strong>','Select plan type (Salary, Hourly, Period Salary, Allowance, Bonus, Stock)','Set frequency and currency','Configure effective date and active status','Link to compensation packages for worker assignment'],
+      tip:'Plan type drives both reporting and payroll integration — confirm with the integration team before creating new plan types.',
+      err:null },
+    { id:12, cat:'security', title:'Security Roles for Compensation',
+      desc:'Assign and troubleshoot compensation security roles for admins, partners, and managers.',
+      steps:['<strong>Compensation Administrator</strong> → full config and process access','<strong>Compensation Partner</strong> → constrained to supervisory org hierarchy','<strong>HR Partner</strong> → typically read access to compensation data','<strong>Manager (Self-Service)</strong> → merit worksheet and OTP requests','Assign: <strong>Worker &gt; Actions &gt; Security &gt; Assign Roles</strong>','For Comp Partners: use Constrained Security Group linked to supervisory org','Test using "View As" simulation or a test user account'],
+      tip:'Comp Partners must always be constrained to their org — unconstrained access is the #1 compensation security audit finding.',
+      err:'"Cannot view merit worksheet" → manager not assigned self-service comp role; "Partner sees all workers" → security group not constrained' },
+    { id:13, cat:'config',   title:'Currency Exchange Rates',
+      desc:'Manage and troubleshoot multi-currency compensation scenarios.',
+      steps:['Navigate to <strong>Maintain Currency Conversion Rates</strong>','Verify rates exist for the required period and currency pair','Check the <strong>Rate Type</strong> configured on the compensation plan','Run <strong>Refresh Currency Rates</strong> after loading new rates','Verify worker location currency matches the plan currency','For live rates: configure an integration with a currency rate provider'],
+      tip:'Set up automated currency rate feeds for any tenant with 5+ currencies — manual rate updates are the most common source of currency errors.',
+      err:'"No rate found for period" → rate table has a gap; "Currency mismatch" → plan vs worker location currency not aligned' },
+    { id:14, cat:'process',  title:'Compensation Reporting & Analytics',
+      desc:'Run and customise compensation reports for cycle oversight and audit.',
+      steps:['Use <strong>Compensation Audit Report</strong> for bulk compa ratio review','Use <strong>Compensation Review Summary</strong> for merit cycle progress tracking','Custom reports: <strong>Reports &gt; Create Custom Report</strong> from Compensation domain','Add calculated fields for specialised metrics (e.g., salary increase %)','Schedule reports via <strong>Schedule Report</strong> for regular delivery','Use <strong>Workday Adaptive Planning</strong> for advanced analytics if licensed'],
+      tip:'Run the Compensation Audit Report before every merit cycle launch to identify workers outside expected compa ratio range.',
+      err:null },
+    { id:15, cat:'process',  title:'Payroll Integration',
+      desc:'Map compensation elements to payroll codes and troubleshoot integration issues.',
+      steps:['Map each compensation plan to a payroll element code','Map compensation change reasons to payroll action/reason codes','Configure the compensation extract integration (EIB or API)','Test in sandbox with a full payroll run','Schedule the extract to run before the payroll close date','Monitor via <strong>Integration &gt; Monitor Integration</strong>'],
+      tip:'Every change reason used in compensation must be mapped in the payroll integration — missing mappings are the #1 source of payroll errors.',
+      err:'"Payment not in payroll" → change reason not mapped; "Wrong amount" → frequency mismatch between comp plan and payroll period' },
+    { id:16, cat:'config',   title:'Compensation Change Reasons',
+      desc:'Create and manage compensation change reasons and event types.',
+      steps:['Navigate to <strong>Compensation &gt; Maintain &gt; Compensation Change Reasons</strong>','Create reason with descriptive name (e.g., "Promotion — Salary Increase")','Map to the correct <strong>Compensation Event Type</strong>','Set availability: which processes can use this reason','Coordinate with integration team on payroll code mapping','Document all reasons in a change reason matrix for client handover'],
+      tip:'Align change reasons with the payroll integration team before go-live — adding new reasons post-go-live requires integration changes.',
+      err:null },
+    { id:17, cat:'trouble',  title:'Compa Ratio & Range Penetration',
+      desc:'Troubleshoot compa ratio and range penetration calculation issues.',
+      steps:['Verify worker has an active <strong>Grade Profile Assignment</strong>','Confirm grade profile has a <strong>Midpoint</strong> value (not 0 or blank)','Confirm worker base salary currency matches grade profile currency','<strong>Compa Ratio</strong> = Worker Base Salary ÷ Midpoint × 100','<strong>Range Penetration</strong> = (Salary − Min) ÷ (Max − Min) × 100','View: <em>Worker &gt; Compensation &gt; Compensation Summary</em>'],
+      tip:'Run the Compensation Audit Report to bulk-check all compa ratios before merit cycle launch.',
+      err:'"Compa ratio = 0 or N/A" → midpoint missing from grade profile; "Range penetration blank" → Min/Max segments not configured' }
+  ],
+
+  render() {
+    const fEl = document.getElementById('qa-filters');
+    fEl.innerHTML = Object.entries(this.cats).map(([k,v]) =>
+      `<button class="fchip ${this.filter===k?'on':''}" onclick="QA.setFilter('${k}')">${v}</button>`
+    ).join('');
+
+    const items = this.filter === 'all' ? this.data : this.data.filter(d => d.cat === this.filter);
+    document.getElementById('qa-list').innerHTML = items.map(t => `
+      <div class="qa-card" id="qc-${t.id}">
+        <div class="qa-head" onclick="QA.toggle(${t.id})">
+          <div class="hl">
+            <span class="badge ${this.bc[t.cat]}">${this.cats[t.cat]}</span>
+            <span class="qa-title">${t.title}</span>
+          </div>
+          <span class="chev">▼</span>
+        </div>
+        <div class="qa-body">
+          <div class="qa-desc">${t.desc}</div>
+          <div class="qa-sec-label">Steps</div>
+          <ol class="qa-steps">${t.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+          ${t.tip  ? `<div class="qa-tip">💡 ${t.tip}</div>` : ''}
+          ${t.err  ? `<div class="qa-err">⚠ Common errors: ${t.err}</div>` : ''}
+        </div>
+      </div>`).join('');
+  },
+
+  setFilter(f) { this.filter = f; this.render(); },
+  toggle(id)   { document.getElementById('qc-'+id).classList.toggle('open'); }
+};
+
+/* ─── SMARTSHEET SYNC ────────────────────────────────────────────── */
+const SS = {
+  prompt: `You are a Workday Compensation expert. I will give you data from multiple Smartsheet trackers. Analyse and return structured insights.
+
+CONTEXT
+• Client: [CLIENT NAME]
+• Engagement: Workday Compensation Implementation (CompIQ)
+• Phase: [Design / Build / Test / Go-Live]
+• Country scope: [COUNTRIES]
+
+─────────────────────────────────────────────
+TASK 1 — Configuration Gap Analysis
+Review the attached Configuration Tracker and identify:
+  a) Items with Status = "Not Started" or "Blocked" that are on the critical path
+  b) Items with no Owner assigned
+  c) Items where Due Date has passed with Status ≠ "Complete"
+
+─────────────────────────────────────────────
+TASK 2 — RAID Log Summary
+From the RAID Log data, summarise:
+  a) Open risks rated HIGH with no Mitigation plan entered
+  b) Open issues raised more than 7 days ago with no Resolution
+  c) Decisions outstanding for more than 14 days with no outcome
+
+─────────────────────────────────────────────
+TASK 3 — EIB Error Analysis
+From the EIB Error Tracker:
+  a) List recurring error patterns across multiple loads
+  b) Identify which workers or orgs appear most often in errors
+  c) Recommend root-cause fixes for the top 3 error types
+
+─────────────────────────────────────────────
+TASK 4 — Weekly Status Narrative
+Write a 3-paragraph executive status update for a steering committee:
+  • Paragraph 1: What was completed this week
+  • Paragraph 2: What is at risk or blocked (be specific)
+  • Paragraph 3: What needs a client decision by end of next week
+
+Format: Use headers for each task. Be specific — reference actual items from the data.`,
+
+  schemas: [
+    { name:'Compensation Configuration Tracker', status:'ready',
+      cols:[
+        { col:'Config Item',       type:'Text',        note:'e.g., Grade Profile — US Salaried' },
+        { col:'Module',            type:'Dropdown',    note:'Merit, Bonus, Allowance, OTP, Stock' },
+        { col:'Status',            type:'Dropdown',    note:'Not Started, In Progress, Complete, Blocked' },
+        { col:'Owner',             type:'Contact',     note:'Accenture or Client team member' },
+        { col:'Due Date',          type:'Date',        note:'Target completion date' },
+        { col:'Go-Live Impact',    type:'Dropdown',    note:'Critical, High, Medium, Low' },
+        { col:'Notes / Blockers',  type:'Text',        note:'Freeform — dependencies, blockers' }
+      ]},
+    { name:'RAID Log', status:'ready',
+      cols:[
+        { col:'ID',                type:'Auto-number', note:'Auto-generated' },
+        { col:'Type',              type:'Dropdown',    note:'Risk, Action, Issue, Decision' },
+        { col:'Description',       type:'Text',        note:'Full description of the item' },
+        { col:'Probability',       type:'Dropdown',    note:'High, Medium, Low (Risks only)' },
+        { col:'Impact',            type:'Dropdown',    note:'High, Medium, Low' },
+        { col:'Mitigation / Resolution', type:'Text',  note:'Current action being taken' },
+        { col:'Owner',             type:'Contact',     note:'' },
+        { col:'Due Date',          type:'Date',        note:'' },
+        { col:'Status',            type:'Dropdown',    note:'Open, In Progress, Closed' }
+      ]},
+    { name:'EIB Error Tracker', status:'needs-data',
+      cols:[
+        { col:'Load Date',         type:'Date',        note:'' },
+        { col:'EIB Name',          type:'Text',        note:'e.g., Merit Update — US Q2 2025' },
+        { col:'Total Rows',        type:'Number',      note:'' },
+        { col:'Error Count',       type:'Number',      note:'' },
+        { col:'Error Description', type:'Text',        note:'Paste from load report' },
+        { col:'Root Cause',        type:'Text',        note:'' },
+        { col:'Resolution',        type:'Text',        note:'' },
+        { col:'Status',            type:'Dropdown',    note:'Open, Resolved, Waived' }
+      ]},
+    { name:'Decisions Log', status:'pending',
+      cols:[
+        { col:'Date Raised',       type:'Date',        note:'' },
+        { col:'Decision Topic',    type:'Text',        note:'' },
+        { col:'Options Presented', type:'Text',        note:'' },
+        { col:'Decision Made',     type:'Text',        note:'' },
+        { col:'Decided By',        type:'Contact',     note:'' },
+        { col:'Workday Impact',    type:'Text',        note:'' },
+        { col:'Status',            type:'Dropdown',    note:'Open, Decided, Deferred' }
+      ]}
+  ],
+
+  statusLabel: { ready:'Ready for analysis', 'needs-data':'Needs data', pending:'Pending setup' },
+  statusDot:   { ready:'s-green', 'needs-data':'s-orange', pending:'s-grey' },
+
+  render() {
+    const el = document.getElementById('ss-root');
+    el.innerHTML = `
+      <!-- PROMPT -->
+      <div class="card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px">
+          <div>
+            <div class="sec-title">Batch Claude Prompt Template</div>
+            <div class="sec-sub">Copy this into Claude and paste your Smartsheet data below it. Claude will analyse gaps, surface risks, and write your status update automatically.</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="copy(SS.prompt,'Prompt copied!')">📋 Copy Prompt</button>
+        </div>
+        <div class="ss-prompt-box">${this.prompt}</div>
+      </div>
+
+      <!-- SCHEMAS -->
+      <div class="card">
+        <div class="sec-title">Sheet Schemas</div>
+        <div class="sec-sub">Column definitions for each Smartsheet tracker. Use these when setting up new sheets or auditing existing ones.</div>
+        ${this.schemas.map((s,i) => `
+          ${i > 0 ? '<hr class="divider">' : ''}
+          <div class="sheet-header">
+            <strong style="font-size:14px">${s.name}</strong>
+            <span style="font-size:12px;color:var(--text-muted)">
+              <span class="sdot ${this.statusDot[s.status]}"></span>${this.statusLabel[s.status]}
+            </span>
+          </div>
+          <table class="schema-tbl">
+            <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+            <tbody>${s.cols.map(c=>`<tr><td><strong>${c.col}</strong></td><td style="color:var(--text-muted)">${c.type}</td><td style="color:var(--text-muted)">${c.note}</td></tr>`).join('')}</tbody>
+          </table>`).join('')}
+      </div>
+
+      <!-- STATUS -->
+      <div class="card">
+        <div class="sec-title">Sync Status</div>
+        <table class="schema-tbl">
+          <thead><tr><th>Sheet</th><th>Status</th><th>Next Action</th></tr></thead>
+          <tbody>
+            <tr><td>Compensation Configuration Tracker</td><td><span class="sdot s-green"></span>Ready</td><td>Paste data into batch prompt</td></tr>
+            <tr><td>RAID Log</td><td><span class="sdot s-green"></span>Ready</td><td>Paste data into batch prompt</td></tr>
+            <tr><td>EIB Error Tracker</td><td><span class="sdot s-orange"></span>Needs data</td><td>Load EIB error logs then paste</td></tr>
+            <tr><td>Decisions Log</td><td><span class="sdot s-grey"></span>Pending setup</td><td>Create sheet using schema above</td></tr>
+          </tbody>
+        </table>
+        <div class="info-box">
+          💡 <strong>Workflow:</strong> Copy the batch prompt → open Claude → paste prompt → paste your Smartsheet data below → send. No API key needed — this is manual batch analysis.
+          <br><br>🔁 <strong>Once Power Automate flows are live</strong>, the Q&amp;A Reference and submission forms will sync directly. Use Settings ⚙ in the Skills Hub to add your webhook URLs.
+        </div>
+      </div>`;
+  }
+};
+
+/* ─── BOOT ───────────────────────────────────────────────────────── */
+SF.render();
+CIQ.init();
+QA.render();
+SS.render();
+</script>
+</body>
+</html>
