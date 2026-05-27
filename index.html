@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Claude Skills — Accenture</title>
+<style>
+:root{
+  --purple:#1A0A3C;--pm:#534AB7;--pl:#EEEDFE;
+  --teal:#0F6E56;--tl:#E1F5EE;--tb:#5DCAA5;
+  --amber:#FAEEDA;--at:#633806;
+  --red:#FAECE7;--rt:#993C1D;
+  --bg:#F2F0F9;--card:#fff;
+  --border:#E2E0EC;--text:#18181B;--muted:#6B6B7A;
+  --r:10px;--rl:14px;--sh:0 1px 4px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--purple);padding:14px 24px;display:flex;align-items:center;gap:12px}
+.hlogo{width:34px;height:34px;background:rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.hlogo svg{width:18px;height:18px;fill:white}
+.htitle{color:#fff;font-size:15px;font-weight:600}
+.hsub{color:rgba(255,255,255,.5);font-size:12px}
+.btn-settings{margin-left:auto;background:rgba(255,255,255,.12);border:none;border-radius:8px;padding:6px 10px;cursor:pointer;color:#fff;font-size:16px;line-height:1;transition:background .15s}
+.btn-settings:hover{background:rgba(255,255,255,.22)}
+.settings-bar{display:none;background:#2d1760;padding:14px 24px;gap:10px;flex-direction:column;border-bottom:1px solid rgba(255,255,255,.1)}
+.settings-bar.open{display:flex}
+.settings-row{display:flex;gap:8px;align-items:center}
+.settings-lbl{font-size:11px;font-weight:600;color:rgba(255,255,255,.6);width:120px;flex-shrink:0;text-transform:uppercase;letter-spacing:.05em}
+.settings-bar input{flex:1;font-size:12px;padding:8px 12px;border-radius:8px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font-family:inherit}
+.settings-bar input::placeholder{color:rgba(255,255,255,.35)}
+.settings-bar input:focus{outline:none;border-color:rgba(255,255,255,.6)}
+.btn-save-url{padding:8px 16px;font-size:13px;font-weight:600;background:var(--teal);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:inherit}
+.url-status{font-size:11px;color:rgba(255,255,255,.5);padding-left:4px}
+.guide-link{font-size:11px;color:rgba(255,255,255,.45);cursor:pointer;text-decoration:underline}
+.guide-link:hover{color:#fff}
+.pa-guide{display:none;background:#F8F7FD;border-bottom:2px solid var(--border);padding:16px 24px}
+.pa-guide.open{display:block}
+.pa-guide-title{font-size:13px;font-weight:700;color:var(--purple);margin-bottom:8px}
+.pa-sub{font-size:11px;color:var(--muted);margin-bottom:12px}
+.pa-flow{margin-bottom:14px}
+.pa-flow-title{font-size:12px;font-weight:700;color:var(--pm);margin-bottom:6px}
+.pa-step{display:flex;gap:8px;margin-bottom:6px;font-size:12px;line-height:1.5;color:var(--text)}
+.pa-num{width:18px;height:18px;border-radius:50%;background:var(--pm);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.pa-code{font-family:monospace;font-size:10px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin:4px 0;white-space:pre;overflow-x:auto;line-height:1.6}
+.browse-wrap{max-width:560px;margin:0 auto;padding:0 16px}
+.browse-toggle{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-radius:var(--rl);border:1px solid var(--border);margin:12px 0 0;cursor:pointer;font-size:13px;font-weight:600;color:var(--text);box-shadow:var(--sh);user-select:none;transition:background .15s}
+.browse-toggle:hover{background:var(--pl)}
+.browse-panel{background:var(--card);border-radius:0 0 var(--rl) var(--rl);border:1px solid var(--border);border-top:none;padding:16px;display:none}
+.browse-panel.open{display:block}
+.browse-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.browse-counts{display:flex;gap:8px}
+.bcount{font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px}
+.bcount-skill{background:var(--pl);color:var(--pm)}
+.bcount-uc{background:var(--tl);color:var(--teal)}
+.btn-refresh{font-size:12px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:8px;padding:4px 10px;cursor:pointer;font-family:inherit}
+.btn-refresh:hover{background:var(--bg)}
+.browse-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.browse-card{background:var(--bg);border-radius:10px;padding:12px;border:1px solid var(--border)}
+.browse-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.btype{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em}
+.btype-skill{background:var(--pl);color:var(--pm)}
+.btype-uc{background:var(--tl);color:var(--teal)}
+.browse-card-name{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:4px}
+.browse-card-sum{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:6px}
+.browse-card-tags{display:flex;flex-wrap:wrap;gap:4px}
+.browse-empty,.browse-loading{text-align:center;padding:20px;font-size:13px;color:var(--muted)}
+.browse-more{text-align:center;font-size:12px;color:var(--muted);padding-top:8px}
+.dots{display:flex;align-items:center;justify-content:center;gap:6px;padding:20px 0 4px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:all .2s}
+.dot.active{background:var(--pm);transform:scale(1.3)}
+.dot.done{background:var(--teal)}
+.step-label{text-align:center;font-size:13px;color:var(--muted);margin-bottom:20px}
+.step-label strong{color:var(--text)}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 60px}
+.panel{display:none}.panel.show{display:block}
+.qcard{background:var(--card);border-radius:var(--rl);border:1px solid var(--border);box-shadow:var(--sh);padding:28px 28px 24px;margin-bottom:12px}
+.q{font-size:19px;font-weight:600;line-height:1.35;margin-bottom:6px}
+.q-hint{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+input,select,textarea{width:100%;font-size:15px;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--r);background:#fff;color:var(--text);font-family:inherit;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pm);box-shadow:0 0 0 3px rgba(83,74,183,.1)}
+textarea{resize:none;line-height:1.6}
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
+.field label{font-size:13px;font-weight:500;color:var(--muted);display:block;margin-bottom:6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sub-hint{font-size:12px;color:var(--muted);margin-top:5px}
+.btn-next{width:100%;padding:14px;font-size:15px;font-weight:600;background:var(--purple);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-family:inherit;margin-top:20px;transition:background .15s}
+.btn-next:hover{background:#2d1760}
+.btn-back{font-size:13px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit;padding:10px 0 0;display:block;text-align:center;width:100%}
+.result-hero{background:var(--purple);border-radius:var(--rl);padding:24px 28px;margin-bottom:12px;color:#fff}
+.result-hero-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;opacity:.6;margin-bottom:6px}
+.result-hero-name{font-size:22px;font-weight:700;margin-bottom:4px}
+.result-hero-sub{font-size:13px;opacity:.7;line-height:1.5}
+.edit-summary{width:100%;font-size:14px;padding:10px 12px;border:1.5px solid rgba(255,255,255,.3);border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-family:inherit;resize:none;margin-top:10px;line-height:1.6}
+.edit-summary::placeholder{color:rgba(255,255,255,.4)}
+.edit-summary:focus{outline:none;border-color:rgba(255,255,255,.7)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font-size:12px;padding:4px 12px;border-radius:99px;font-weight:500}
+.t-purple{background:rgba(255,255,255,.15);color:#fff}
+.t-green{background:var(--tl);color:var(--teal)}
+.t-amber{background:var(--amber);color:var(--at)}
+.t-red{background:var(--red);color:var(--rt)}
+.t-blue{background:#E6F1FB;color:#0C447C}
+.t-gray{background:#F1EFE8;color:#5F5E5A}
+.t-workday{background:#FEF3C7;color:#92400E}
+.accordion{background:var(--card);border-radius:var(--rl);border:1px solid var(--border);box-shadow:var(--sh);overflow:hidden;margin-bottom:12px}
+.acc-header{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.acc-title{font-size:14px;font-weight:600}
+.acc-arrow{font-size:12px;color:var(--muted);transition:transform .2s}
+.acc-arrow.open{transform:rotate(180deg)}
+.acc-body{display:none;padding:0 20px 18px;border-top:1px solid var(--border)}
+.acc-body.show{display:block}
+.fw-block{border-radius:8px;padding:12px 14px;margin-top:10px;font-size:13px;line-height:1.7}
+.fw-block ul{padding-left:16px}.fw-block li{margin-bottom:4px}
+.fw-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.b-p{background:var(--red)}.b-p .fw-label{color:var(--rt)}
+.b-s{background:var(--tl)}.b-s .fw-label{color:var(--teal)}
+.b-st{background:var(--pl)}.b-st .fw-label{color:var(--pm)}
+.b-r{background:var(--amber)}.b-r .fw-label{color:var(--at)}
+.btn-submit{width:100%;padding:16px;font-size:15px;font-weight:700;background:var(--purple);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s,opacity .15s}
+.btn-submit:hover:not(:disabled){background:#2d1760}
+.btn-submit:disabled{opacity:.65;cursor:not-allowed}
+.btn-submit.teal{background:var(--teal)}.btn-submit.teal:hover:not(:disabled){background:#085041}
+.btn-submit.ok{background:var(--teal);pointer-events:none}
+.btn-submit.err{background:#993C1D}
+.submit-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:6px;min-height:16px}
+.secondary-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.btn-sec{padding:11px 14px;font-size:13px;font-weight:500;background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-family:inherit;text-align:left;transition:background .15s}
+.btn-sec:hover{background:var(--bg)}
+.btn-sec .sicon{display:block;font-size:16px;margin-bottom:3px}
+.btn-sec .stitle{font-size:13px;font-weight:600}
+.btn-sec .sdesc{font-size:11px;color:var(--muted)}
+.prompt-box{font-family:monospace;font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;line-height:1.8;white-space:pre-wrap;max-height:200px;overflow-y:auto;margin:8px 0}
+.chooser{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+.choice{border:2px solid var(--border);border-radius:var(--rl);padding:24px 20px;cursor:pointer;background:var(--card);text-align:center;transition:all .18s;font-family:inherit}
+.choice:hover{border-color:var(--pm);background:var(--pl);transform:translateY(-2px)}
+.choice-icon{font-size:36px;display:block;margin-bottom:10px}
+.choice-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.choice-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.mode-badge{display:inline-block;font-size:11px;padding:3px 10px;border-radius:99px;font-weight:600;margin-bottom:12px}
+.mb-skill{background:#EEEDFE;color:#3C3489}
+.mb-uc{background:#E1F5EE;color:#085041}
+.link-banner{border-radius:var(--r);padding:12px 16px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.5}
+.lb-skill{background:#EEEDFE;border:1px solid #AFA9EC;color:#3C3489}
+.lb-uc{background:#E1F5EE;border:1px solid #5DCAA5;color:#085041}
+.lb-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.lb-text strong{display:block;font-weight:600;margin-bottom:2px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--purple);color:#fff;padding:12px 24px;border-radius:99px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.2);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.btn-reset{font-size:13px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:inherit;padding:16px 0 0;display:block;text-align:center;width:100%}
+.btn-reset:hover{color:var(--text)}
+@media(max-width:480px){.row2,.browse-grid,.secondary-actions{grid-template-columns:1fr}.settings-row{flex-direction:column}.settings-lbl{width:auto}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="hlogo"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+  <div><div class="htitle">Claude Skills Repository</div><div class="hsub">Accenture Product Business Group</div></div>
+  <button class="btn-settings" onclick="toggleSettings()" title="Configure webhooks">⚙️</button>
+</div>
+
+<div class="settings-bar" id="settings-bar">
+  <div class="settings-row">
+    <span class="settings-lbl">Write webhook</span>
+    <input type="url" id="pa-write-url" placeholder="Power Automate HTTP trigger URL — receives submissions"/>
+  </div>
+  <div class="settings-row">
+    <span class="settings-lbl">Read webhook</span>
+    <input type="url" id="pa-read-url" placeholder="Power Automate HTTP trigger URL — returns repository data"/>
+  </div>
+  <div class="settings-row">
+    <button class="btn-save-url" onclick="saveUrls()">Save</button>
+    <span class="url-status" id="url-status"></span>
+  </div>
+  <span class="guide-link" onclick="toggleGuide()">ℹ️ How to set up the two Power Automate flows (10 min, no IT ticket) →</span>
+</div>
+
+<div class="pa-guide" id="pa-guide">
+  <div class="pa-guide-title">Power Automate setup — bypasses DLP by using a generic HTTP action instead of the blocked Smartsheet connector</div>
+  <div class="pa-sub">Both flows call api.smartsheet.com directly with your API token. The DLP policy blocks the Smartsheet <em>connector</em> — not outbound HTTP requests.</div>
+
+  <div class="pa-flow">
+    <div class="pa-flow-title">FLOW 1 — Write (HTML → Smartsheet)</div>
+    <div class="pa-step"><div class="pa-num">1</div><div>New flow → <strong>Instant cloud flow</strong> → trigger: <strong>When an HTTP request is received</strong>. Method: POST.</div></div>
+    <div class="pa-step"><div class="pa-num">2</div><div>Add action: <strong>HTTP</strong> (Premium connector). Set:
+<div class="pa-code">Method:  POST
+URI:     https://api.smartsheet.com/2.0/sheets/3347520112512900/rows
+Headers: Authorization  →  Bearer HjWP8vWXFHrRAyQNjB1opaKX9gJNwE3kksEKG
+         Content-Type   →  application/json
+Body:    [{"cells": @{triggerBody()?['cells']}, "toBottom": true}]</div></div></div>
+    <div class="pa-step"><div class="pa-num">3</div><div>Add action: <strong>Response</strong>. Status code: 200. Body: <code>{"result":"ok"}</code>. Save — copy the HTTP POST URL → paste as <em>Write webhook</em>.</div></div>
+  </div>
+
+  <div class="pa-flow">
+    <div class="pa-flow-title">FLOW 2 — Read (Smartsheet → HTML)</div>
+    <div class="pa-step"><div class="pa-num">1</div><div>New flow → <strong>Instant cloud flow</strong> → trigger: <strong>When an HTTP request is received</strong>. Method: GET.</div></div>
+    <div class="pa-step"><div class="pa-num">2</div><div>Add <strong>HTTP</strong> action:
+<div class="pa-code">Method:  GET
+URI:     https://api.smartsheet.com/2.0/sheets/3347520112512900
+Headers: Authorization  →  Bearer HjWP8vWXFHrRAyQNjB1opaKX9gJNwE3kksEKG</div></div></div>
+    <div class="pa-step"><div class="pa-num">3</div><div>Add <strong>Response</strong> action. Status: 200. Body: <code>@{body('HTTP')}</code>. Add header: <code>Content-Type → application/json</code>. Save — paste URL as <em>Read webhook</em>.</div></div>
+  </div>
+</div>
+
+<div class="browse-wrap">
+  <div class="browse-toggle" onclick="toggleBrowse()">
+    <span>📚 Browse Repository</span><span id="browse-arrow">▼</span>
+  </div>
+  <div class="browse-panel" id="browse-panel">
+    <div class="browse-empty">Configure webhooks in ⚙️ settings to browse the live repository.</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div id="chooser" style="padding-top:20px">
+    <div class="qcard">
+      <div class="q">What are you adding today?</div>
+      <div class="q-hint">Pick one — you can always come back and add the other.</div>
+      <div class="chooser">
+        <button class="choice" onclick="startMode('skill')">
+          <span class="choice-icon">🧠</span>
+          <div class="choice-title">A skill</div>
+          <div class="choice-desc">Something Claude can do — like summarise a document, write a proposal, or review a contract</div>
+        </button>
+        <button class="choice" onclick="startMode('usecase')">
+          <span class="choice-icon">💡</span>
+          <div class="choice-title">A use case</div>
+          <div class="choice-desc">A problem your team has that Claude could solve — even if you're not sure which skill yet</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="dots" id="dot-row" style="display:none">
+    <div class="dot active" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div>
+  </div>
+  <div class="step-label" id="step-label" style="display:none"><strong>Step 1 of 3</strong></div>
+
+  <!-- SKILL STEP 1 -->
+  <div class="panel show" id="p1">
+    <div class="qcard">
+      <div class="q">What is the skill called?</div>
+      <div class="q-hint">Give it a short, clear name.</div>
+      <input id="f-name" type="text" placeholder="e.g. Contract review, Proposal writer, Report summariser"/>
+    </div>
+    <div class="qcard">
+      <div class="q">What does it do?</div>
+      <div class="q-hint">What goes in, what comes out, what problem it fixes.</div>
+      <textarea id="f-desc" rows="4" placeholder="e.g. You paste in a contract and Claude pulls out every deadline, obligation and party name into a clean table."></textarea>
+    </div>
+    <div class="qcard">
+      <div class="q">Who uses it and what does a win look like?</div>
+      <div class="q-hint">Who is this for, and how will you know it worked?</div>
+      <textarea id="f-success" rows="3" placeholder="e.g. 12 legal analysts. A win = contract review drops from 3 hours to 20 minutes."></textarea>
+    </div>
+    <button class="btn-next" onclick="go(2)">Next →</button>
+  </div>
+
+  <!-- SKILL STEP 2 -->
+  <div class="panel" id="p2">
+    <div class="qcard">
+      <div class="q">A few quick details</div>
+      <div class="q-hint">Helps with sorting and tagging. All optional.</div>
+      <div class="row2">
+        <div class="field"><label>Skill type</label>
+          <select id="f-cat">
+            <option value="">— pick one —</option>
+            <option>Document Analysis</option><option>Content Generation</option>
+            <option>Research & Synthesis</option><option>Data & Automation</option>
+            <option>Code Assistance</option><option>Knowledge & Search</option>
+            <option>Analytics</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Business area</label>
+          <select id="f-func">
+            <option value="">— pick one —</option>
+            <option>Sales & BD</option><option>Legal & Procurement</option>
+            <option>Product & Engineering</option><option>Operations</option>
+            <option>Client Experience</option><option>HR & Talent</option>
+            <option>Finance</option><option>Strategy & Consulting</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Any tools or systems involved?</label>
+        <input id="f-tools" type="text" placeholder="e.g. Workday, SharePoint, Salesforce"/>
+        <div class="sub-hint">Workday? Name the area — e.g. "Workday Compensation" or "Workday Payroll"</div>
+      </div>
+      <div class="field">
+        <label>Your name or email</label>
+        <input id="f-submitter" type="text" placeholder="e.g. jane.smith@accenture.com"/>
+      </div>
+    </div>
+    <button class="btn-next" onclick="go(3)">Build my submission →</button>
+    <button class="btn-back" onclick="go(1)">← Back</button>
+  </div>
+
+  <!-- SKILL STEP 3 -->
+  <div class="panel" id="p3">
+    <div class="result-hero">
+      <div class="result-hero-label">Your skill</div>
+      <div class="result-hero-name" id="hero-name"></div>
+      <div class="result-hero-sub">Edit the summary below if needed:</div>
+      <textarea class="edit-summary" id="rev-summary" rows="3"></textarea>
+      <div class="tags" id="tag-row"></div>
+    </div>
+    <div class="link-banner lb-skill">
+      <span class="lb-icon">🔗</span>
+      <div class="lb-text"><strong>Use cases generated during weekly review</strong>Claude will suggest 3–5 real Accenture use cases for this skill each Monday.</div>
+    </div>
+    <button class="btn-submit" id="submit-btn" onclick="submitSkill()">
+      <span id="submit-label">📤 Submit to Smartsheet</span>
+    </button>
+    <div class="submit-hint" id="submit-hint">Saves directly — no copy-paste needed</div>
+    <div class="secondary-actions" style="margin-top:16px">
+      <button class="btn-sec" onclick="copySolution()"><span class="sicon">📄</span><span class="stitle">Copy solution</span><span class="sdesc">For email or notes</span></button>
+      <button class="btn-sec" onclick="copyReviewPrompt()"><span class="sicon">📅</span><span class="stitle">Copy weekly prompt</span><span class="sdesc">For Monday review</span></button>
+    </div>
+    <div class="accordion" style="margin-top:16px">
+      <div class="acc-header" onclick="toggleAcc('fw')"><div class="acc-title">📋 Solution framework</div><div class="acc-arrow" id="fw-arrow">▼</div></div>
+      <div class="acc-body" id="fw-body"><div id="sol-container"></div></div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc('cat')"><div class="acc-title">🏷️ Auto-categories</div><div class="acc-arrow" id="cat-arrow">▼</div></div>
+      <div class="acc-body" id="cat-body">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;padding-top:4px">Assigned automatically — practice leads use these to find relevant skills.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#534AB7;margin-bottom:4px">Domain</div>
+            <span class="tag" id="cat-domain-val" style="background:#EEEDFE;color:#3C3489">—</span>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px" id="cat-domain-why"></div>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--teal);margin-bottom:4px">Complexity</div>
+            <span class="tag" id="cat-complex-val">—</span>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px" id="cat-complex-why"></div>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--rt);margin-bottom:4px">Can we sell it?</div>
+            <span class="tag" id="cat-package-val">—</span>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px" id="cat-package-why"></div>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#185FA5;margin-bottom:4px">Service line</div>
+            <span class="tag t-blue" id="cat-service-val">—</span>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px" id="cat-service-why"></div>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;grid-column:1/-1">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#854F0B;margin-bottom:4px">Workday practice</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span class="tag" id="cat-wd-val">—</span>
+              <span style="font-size:13px;font-weight:600" id="cat-wd-area"></span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px" id="cat-wd-why"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc('rev')"><div class="acc-title">📅 Weekly review prompt</div><div class="acc-arrow" id="rev-arrow">▼</div></div>
+      <div class="acc-body" id="rev-body">
+        <div style="font-size:13px;color:var(--muted);padding-top:6px;margin-bottom:6px">Every Monday: export Smartsheet → upload to Claude → paste this.</div>
+        <div class="prompt-box" id="review-prompt-box"></div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button class="btn-sec" onclick="copyReviewPrompt()" style="flex:1"><span class="sicon">📋</span><span class="stitle">Copy prompt</span></button>
+          <button class="btn-sec" onclick="copyWithContext()" style="flex:1"><span class="sicon">📦</span><span class="stitle">Prompt + skill</span></button>
+        </div>
+      </div>
+    </div>
+    <button class="btn-reset" onclick="resetAll()">+ Submit another skill</button>
+  </div>
+
+  <!-- USE CASE STEP 1 -->
+  <div class="panel" id="uc1">
+    <div class="qcard">
+      <span class="mode-badge mb-uc">Use case</span>
+      <div class="q">What's the problem?</div>
+      <div class="q-hint">Describe what your team struggles with — don't worry about the solution yet.</div>
+      <textarea id="uc-problem" rows="4" placeholder="e.g. Our team spends 2 days every week pulling data from 3 systems to build the same status report."></textarea>
+    </div>
+    <div class="qcard">
+      <div class="q">Who has this problem?</div>
+      <div class="q-hint">Who is affected, and how often?</div>
+      <textarea id="uc-who" rows="3" placeholder="e.g. 8 project managers. Happens every Friday — takes about 4 hours each time."></textarea>
+    </div>
+    <div class="qcard">
+      <div class="q">What would a great outcome look like?</div>
+      <textarea id="uc-outcome" rows="3" placeholder="e.g. Report builds itself in 10 minutes. PMs spend that time on actual work."></textarea>
+    </div>
+    <button class="btn-next" onclick="goUC(2)">Next →</button>
+  </div>
+
+  <!-- USE CASE STEP 2 -->
+  <div class="panel" id="uc2">
+    <div class="qcard">
+      <span class="mode-badge mb-uc">Use case</span>
+      <div class="q">A bit more detail</div>
+      <div class="q-hint">Helps with categorisation. All optional.</div>
+      <div class="row2">
+        <div class="field"><label>Business area</label>
+          <select id="uc-func">
+            <option value="">— pick one —</option>
+            <option>Sales & BD</option><option>Legal & Procurement</option>
+            <option>Product & Engineering</option><option>Operations</option>
+            <option>Client Experience</option><option>HR & Talent</option>
+            <option>Finance</option><option>Strategy & Consulting</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label>Priority</label>
+          <select id="uc-priority">
+            <option value="">— pick one —</option>
+            <option>High — blocking work</option>
+            <option>Medium — big time sink</option>
+            <option>Low — nice to have</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Tools or systems involved</label>
+        <input id="uc-tools" type="text" placeholder="e.g. Workday, SharePoint, Salesforce"/>
+      </div>
+      <div class="field">
+        <label>Your name or email</label>
+        <input id="uc-submitter" type="text" placeholder="e.g. jane.smith@accenture.com"/>
+      </div>
+    </div>
+    <button class="btn-next" onclick="goUC(3)">See my submission →</button>
+    <button class="btn-back" onclick="goUC(1)">← Back</button>
+  </div>
+
+  <!-- USE CASE STEP 3 -->
+  <div class="panel" id="uc3">
+    <div class="result-hero" style="background:var(--teal)">
+      <div class="result-hero-label">Use case</div>
+      <div class="result-hero-name" id="uc-hero-name"></div>
+      <div class="result-hero-sub">Edit the summary if needed:</div>
+      <textarea class="edit-summary" id="uc-rev-summary" rows="3"></textarea>
+      <div class="tags" id="uc-tag-row"></div>
+    </div>
+    <div class="link-banner lb-uc">
+      <span class="lb-icon">🔗</span>
+      <div class="lb-text"><strong>Matching skills suggested during weekly review</strong>Claude will match this use case to existing skills — or propose new ones to build.</div>
+    </div>
+    <button class="btn-submit teal" id="uc-submit-btn" onclick="submitUseCase()">
+      <span id="uc-submit-label">📤 Submit to Smartsheet</span>
+    </button>
+    <div class="submit-hint">Saves directly — no copy-paste needed</div>
+    <div class="accordion" style="margin-top:16px">
+      <div class="acc-header" onclick="toggleAcc('uccat')"><div class="acc-title">🏷️ Auto-categories</div><div class="acc-arrow" id="uccat-arrow">▼</div></div>
+      <div class="acc-body" id="uccat-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:8px">
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#534AB7;margin-bottom:4px">Domain</div>
+            <span class="tag" id="uc-cat-domain">—</span>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--rt);margin-bottom:4px">Can we sell it?</div>
+            <span class="tag" id="uc-cat-pkg">—</span>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;grid-column:1/-1">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#854F0B;margin-bottom:4px">Workday practice</div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span class="tag" id="uc-cat-wd">—</span>
+              <span style="font-size:13px;font-weight:600" id="uc-cat-wd-area"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="acc-header" onclick="toggleAcc('ucprompt')"><div class="acc-title">📅 Weekly review prompt</div><div class="acc-arrow" id="ucprompt-arrow">▼</div></div>
+      <div class="acc-body" id="ucprompt-body">
+        <div class="prompt-box" id="uc-review-prompt-box"></div>
+        <button class="btn-sec" onclick="copyReviewPrompt()" style="width:100%"><span class="sicon">📋</span><span class="stitle">Copy review prompt</span></button>
+      </div>
+    </div>
+    <button class="btn-reset" onclick="resetAll()">+ Submit another</button>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+let sol = {}, mode = 'none';
+
+// ── COLUMN IDs (Smartsheet sheet 3347520112512900) ─────────────
+const COL = {
+  'Skill Name':                2612863985553284,
+  'Type':                      7116463612923780,
+  'Business Area':             1486964078710660,
+  'Domain':                    5990563706081156,
+  'Complexity':                3738763892395908,
+  'Can We Sell It?':           8242363519766404,
+  'Service Line':               924014125289348,
+  'Workday Practice':          5427613752659844,
+  'Workday Area':              3175813938974596,
+  'Summary':                   7679413566345092,
+  'Tools / Systems':           2049914032131972,
+  'Who Uses It & Win':         6553513659502468,
+  'Problem':                   4301713845817220,
+  'Solution':                  8805313473187716,
+  'Implementation Steps':       220326683512708,
+  'Watch Out For':             4723926310883204,
+  'Target Outcome':            2472126497197956,
+  'Linked Skills / Use Cases': 6975726124568452,
+  'Suggested Pairs':           1346226590355332,
+  'Submitted By':              5849826217725828,
+  'Date Submitted':            3598026404040580,
+  'Status':                    8101626031411076,
+  'Priority':                   783276636934020,
+  'Owner':                     5286876264304516,
+  'Notes':                     3035076450619268
+};
+
+// ── WRITE PATH ─────────────────────────────────────────────────
+async function postRow(fields) {
+  const url = localStorage.getItem('acn_pa_write_url');
+  if (!url) { toggleSettings(); toast('⚙️ Add your write webhook URL first'); return false; }
+  const cells = Object.entries(fields)
+    .filter(([k]) => COL[k] !== undefined)
+    .map(([k, val]) => ({ columnId: COL[k], value: String(val || '') }));
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cells, toBottom: true })
+  });
+  if (!res.ok && res.status !== 200) throw new Error('HTTP ' + res.status);
+  return true;
+}
+
+async function submitSkill() {
+  const btn = document.getElementById('submit-btn');
+  const lbl = document.getElementById('submit-label');
+  const hint = document.getElementById('submit-hint');
+  btn.disabled = true; lbl.textContent = '⏳ Saving…';
+  try {
+    await postRow({
+      'Skill Name': v('f-name'), 'Type': 'Skill',
+      'Business Area': v('f-func'), 'Domain': sol.catDomain||'',
+      'Complexity': sol.catComplex||'', 'Can We Sell It?': sol.catPkg||'',
+      'Service Line': sol.catService||'', 'Workday Practice': sol.catWD||'',
+      'Workday Area': sol.catWDArea||'',
+      'Summary': v('rev-summary')||v('f-desc'),
+      'Tools / Systems': v('f-tools'), 'Who Uses It & Win': v('f-success'),
+      'Problem': sol.problem||'', 'Solution': sol.solution||'',
+      'Implementation Steps': (sol.steps||[]).join(' | '),
+      'Watch Out For': (sol.risks||[]).join(' | '), 'Target Outcome': sol.kpi||'',
+      'Linked Skills / Use Cases': 'PENDING — see weekly review',
+      'Submitted By': v('f-submitter'),
+      'Date Submitted': new Date().toLocaleDateString('en-GB'),
+      'Status': 'Backlog', 'Priority': 'Medium'
+    });
+    btn.classList.add('ok'); lbl.textContent = '✓ Saved to Smartsheet';
+    hint.textContent = 'Smartsheet updated — no copy-paste needed';
+    localStorage.removeItem('acn_ss_cache');
+  } catch(e) {
+    btn.disabled = false; btn.classList.add('err');
+    lbl.textContent = '⚠️ Retry'; hint.textContent = e.message;
+  }
+}
+
+async function submitUseCase() {
+  const btn = document.getElementById('uc-submit-btn');
+  const lbl = document.getElementById('uc-submit-label');
+  btn.disabled = true; lbl.textContent = '⏳ Saving…';
+  const pri = v('uc-priority');
+  try {
+    await postRow({
+      'Skill Name': v('uc-problem').split('.')[0].slice(0,60),
+      'Type': 'Use Case', 'Business Area': v('uc-func'),
+      'Domain': sol.ucDomain||'', 'Can We Sell It?': sol.ucPkg||'',
+      'Workday Practice': sol.ucWD||'', 'Workday Area': sol.ucWDArea||'',
+      'Summary': v('uc-rev-summary')||v('uc-problem'),
+      'Tools / Systems': v('uc-tools'), 'Who Uses It & Win': v('uc-who'),
+      'Problem': v('uc-problem'), 'Target Outcome': v('uc-outcome'),
+      'Linked Skills / Use Cases': 'PENDING — see weekly review',
+      'Submitted By': v('uc-submitter'),
+      'Date Submitted': new Date().toLocaleDateString('en-GB'),
+      'Status': 'Backlog',
+      'Priority': pri.includes('High')?'High':pri.includes('Low')?'Low':'Medium'
+    });
+    btn.classList.add('ok'); lbl.textContent = '✓ Saved to Smartsheet';
+    localStorage.removeItem('acn_ss_cache');
+  } catch(e) {
+    btn.disabled = false; btn.classList.add('err'); lbl.textContent = '⚠️ Retry';
+  }
+}
+
+// ── READ PATH ──────────────────────────────────────────────────
+const CACHE_KEY = 'acn_ss_cache', CACHE_TTL = 5 * 60 * 1000;
+
+async function loadBrowse() {
+  const url = localStorage.getItem('acn_pa_read_url');
+  const panel = document.getElementById('browse-panel');
+  if (!url) { panel.innerHTML = '<div class="browse-empty">Add your read webhook URL in ⚙️ settings to browse live data.</div>'; return; }
+  const hit = localStorage.getItem(CACHE_KEY);
+  if (hit) { try { const {ts,data} = JSON.parse(hit); if (Date.now()-ts < CACHE_TTL) { renderBrowse(data); return; } } catch(e){} }
+  panel.innerHTML = '<div class="browse-loading">Loading…</div>';
+  try {
+    const json = await (await fetch(url)).json();
+    const colMap = {}; (json.columns||[]).forEach(c => { colMap[c.id] = c.title; });
+    const rows = (json.rows||[]).map(row => {
+      const obj = {}; (row.cells||[]).forEach(cell => { const n = colMap[cell.columnId]; if(n) obj[n] = cell.displayValue||cell.value||''; }); return obj;
+    });
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ts: Date.now(), data: rows}));
+    renderBrowse(rows);
+  } catch(e) { panel.innerHTML = '<div class="browse-empty">Could not load — check read URL in settings.</div>'; }
+}
+
+function renderBrowse(rows) {
+  const panel = document.getElementById('browse-panel');
+  if (!rows?.length) { panel.innerHTML = '<div class="browse-empty">No entries yet — submit the first one below.</div>'; return; }
+  const skills = rows.filter(r => r.Type !== 'Use Case');
+  const ucs = rows.filter(r => r.Type === 'Use Case');
+  panel.innerHTML = `
+    <div class="browse-header">
+      <div class="browse-counts">
+        <span class="bcount bcount-skill">${skills.length} Skill${skills.length!==1?'s':''}</span>
+        <span class="bcount bcount-uc">${ucs.length} Use Case${ucs.length!==1?'s':''}</span>
+      </div>
+      <button class="btn-refresh" onclick="refreshBrowse()">↻ Refresh</button>
+    </div>
+    <div class="browse-grid">${rows.slice(0,12).map(cardHTML).join('')}</div>
+    ${rows.length>12?`<div class="browse-more">Showing 12 of ${rows.length}</div>`:''}`;
+}
+
+function cardHTML(r) {
+  const uc = r.Type==='Use Case';
+  const st = r.Status||'Backlog';
+  const sc = st==='Complete'?'t-green':st==='In Progress'?'t-blue':'t-gray';
+  const sum = (r.Summary||'').slice(0,90);
+  return `<div class="browse-card">
+    <div class="browse-card-head"><span class="btype ${uc?'btype-uc':'btype-skill'}">${uc?'Use Case':'Skill'}</span><span class="tag ${sc}" style="font-size:10px;padding:2px 8px">${st}</span></div>
+    <div class="browse-card-name">${r['Skill Name']||'—'}</div>
+    <div class="browse-card-sum">${sum}${sum.length>=90?'…':''}</div>
+    <div class="browse-card-tags">
+      ${r.Domain?`<span class="tag t-purple" style="font-size:10px;padding:2px 8px">${r.Domain}</span>`:''}
+      ${r['Can We Sell It?']?`<span class="tag t-amber" style="font-size:10px;padding:2px 8px">${r['Can We Sell It?']}</span>`:''}
+    </div></div>`;
+}
+
+async function refreshBrowse() { localStorage.removeItem(CACHE_KEY); await loadBrowse(); }
+
+function toggleBrowse() {
+  const p = document.getElementById('browse-panel');
+  const open = p.classList.toggle('open');
+  document.getElementById('browse-arrow').textContent = open ? '▲' : '▼';
+  if (open) loadBrowse();
+}
+
+// ── SETTINGS ───────────────────────────────────────────────────
+function toggleSettings() {
+  const bar = document.getElementById('settings-bar');
+  bar.classList.toggle('open');
+  if (bar.classList.contains('open')) {
+    document.getElementById('pa-write-url').value = localStorage.getItem('acn_pa_write_url')||'';
+    document.getElementById('pa-read-url').value = localStorage.getItem('acn_pa_read_url')||'';
+    syncStatus();
+  }
+}
+function saveUrls() {
+  const w = document.getElementById('pa-write-url').value.trim();
+  const r = document.getElementById('pa-read-url').value.trim();
+  if (w) localStorage.setItem('acn_pa_write_url', w);
+  if (r) localStorage.setItem('acn_pa_read_url', r);
+  syncStatus(); toast('✓ Webhook URLs saved');
+  setTimeout(() => { document.getElementById('settings-bar').classList.remove('open'); document.getElementById('pa-guide').classList.remove('open'); }, 700);
+}
+function syncStatus() {
+  const w = localStorage.getItem('acn_pa_write_url'), r = localStorage.getItem('acn_pa_read_url');
+  document.getElementById('url-status').textContent = (w?'✓ Write ':'✗ Write ') + (r?'✓ Read':'✗ Read');
+}
+function toggleGuide() { document.getElementById('pa-guide').classList.toggle('open'); }
+
+// ── NAVIGATION ─────────────────────────────────────────────────
+function startMode(m) {
+  mode = m;
+  document.getElementById('chooser').style.display = 'none';
+  document.getElementById('dot-row').style.display = 'flex';
+  document.getElementById('step-label').style.display = 'block';
+  m==='skill' ? setStep(1) : setUCStep(1);
+}
+function setStep(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('p'+i).classList.toggle('show', i===n);
+    const d = document.getElementById('d'+i); d.classList.remove('active','done');
+    if(i===n) d.classList.add('active'); if(i<n) d.classList.add('done');
+  });
+  document.getElementById('step-label').innerHTML = {1:'<strong>Step 1 of 3</strong> — Tell us about the skill',2:'<strong>Step 2 of 3</strong> — A few quick details',3:'<strong>Done!</strong> — Review and submit'}[n];
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function go(n) {
+  if(n>1&&!v('f-name').trim()){alert('What is the skill called?');return;}
+  if(n>1&&!v('f-desc').trim()){alert('Please describe what the skill does.');return;}
+  if(n>1&&!v('f-success').trim()){alert('Who uses it and what does a win look like?');return;}
+  if(n===3) buildAll();
+  setStep(n);
+}
+function setUCStep(n) {
+  [1,2,3].forEach(i => {
+    const p = document.getElementById('uc'+i); if(p) p.classList.toggle('show', i===n);
+    const d = document.getElementById('d'+i); d.classList.remove('active','done');
+    if(i===n) d.classList.add('active'); if(i<n) d.classList.add('done');
+  });
+  [1,2,3].forEach(i => { const p=document.getElementById('p'+i); if(p) p.classList.remove('show'); });
+  document.getElementById('step-label').innerHTML = {1:'<strong>Step 1 of 3</strong> — Tell us about the use case',2:'<strong>Step 2 of 3</strong> — A bit more detail',3:'<strong>Done!</strong> — Review and submit'}[n];
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goUC(n) {
+  if(n>1&&!v('uc-problem').trim()){alert("What's the problem?");return;}
+  if(n>1&&!v('uc-who').trim()){alert('Who has this problem?');return;}
+  if(n>1&&!v('uc-outcome').trim()){alert('What would a great outcome look like?');return;}
+  if(n===3) buildUC();
+  setUCStep(n);
+}
+
+// ── BUILD SKILL ────────────────────────────────────────────────
+function buildAll() {
+  const name=v('f-name'),desc=v('f-desc'),success=v('f-success'),func=v('f-func'),tools=v('f-tools'),cat=v('f-cat');
+  document.getElementById('hero-name').textContent = name;
+  sv('rev-summary', desc.slice(0,220)+(desc.length>220?'…':''));
+  document.getElementById('tag-row').innerHTML = [[func,'t-purple'],[cat,'t-purple'],[tools?tools.split(',')[0].trim():null,'t-purple']].filter(t=>t[0]).map(([l,c])=>`<span class="tag ${c}">${l}</span>`).join('');
+  sol.problem = `Today, this is done manually with no AI assistance. ${success.split('.')[0]} represents the gap.`;
+  sol.solution = `Claude's ${name} skill fixes this by ${desc.slice(0,180)}${tools?' Using '+tools.split(',')[0].trim()+' in your existing workflow.':''}`;
+  sol.steps = [`Get your input ready (${tools?'from '+tools.split(',')[0].trim():'the document or data'})`,`Paste it into Claude with a short instruction`,`Check the output`,`Copy result into your workflow`,`Track time saved and refine the prompt`];
+  sol.risks = [`Verify content is approved for AI use under Accenture policy`,`Human-check outputs, especially in the first few weeks`,`Run a 30-min intro so users get the best from it`];
+  sol.kpi = success;
+  const sc = document.getElementById('sol-container'); sc.innerHTML='';
+  [{cls:'b-p',icon:'⚠️',label:'Problem',html:`<p>${sol.problem}</p>`},{cls:'b-s',icon:'✅',label:'Solution',html:`<p>${sol.solution}</p>`},{cls:'b-st',icon:'📋',label:'Steps',html:`<ul>${sol.steps.map(s=>`<li>${s}</li>`).join('')}</ul>`},{cls:'b-r',icon:'🛡️',label:'Watch out for',html:`<ul>${sol.risks.map(r=>`<li>${r}</li>`).join('')}</ul>`}].forEach(b=>{const d=document.createElement('div');d.className='fw-block '+b.cls;d.innerHTML=`<div class="fw-label">${b.icon} ${b.label}</div><div>${b.html}</div>`;sc.appendChild(d);});
+  const kd=document.createElement('div');kd.style.cssText='background:#F4F3FA;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:13px';kd.innerHTML=`<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6B6B7A;margin-bottom:3px">What a win looks like</div>${sol.kpi}`;sc.appendChild(kd);
+  classify(name,desc,func,tools,cat,success);
+  document.getElementById('review-prompt-box').textContent = REVIEW_PROMPT;
+  const btn=document.getElementById('submit-btn'); btn.disabled=false; btn.className='btn-submit'; document.getElementById('submit-label').textContent='📤 Submit to Smartsheet'; document.getElementById('submit-hint').textContent='Saves directly — no copy-paste needed';
+}
+
+// ── BUILD USE CASE ─────────────────────────────────────────────
+function buildUC() {
+  const prob=v('uc-problem'),who=v('uc-who'),outcome=v('uc-outcome'),func=v('uc-func'),tools=v('uc-tools'),priority=v('uc-priority');
+  document.getElementById('uc-hero-name').textContent = prob.split('.')[0].slice(0,60)+(prob.length>60?'…':'');
+  sv('uc-rev-summary', prob.slice(0,200)+(prob.length>200?'…':''));
+  document.getElementById('uc-tag-row').innerHTML = [[func,'t-purple'],[priority,'t-purple'],[tools?tools.split(',')[0].trim():null,'t-purple']].filter(t=>t[0]).map(([l,c])=>`<span class="tag ${c}">${l}</span>`).join('');
+  const all=(prob+' '+who+' '+outcome+' '+(tools||'')+' '+(func||'')).toLowerCase();
+  const dm=[{l:'Project Management',k:['project','sprint','milestone','roadmap']},{l:'Legal & Compliance',k:['contract','legal','compliance','nda','policy']},{l:'Finance',k:['finance','invoice','budget','forecast','revenue']},{l:'Sales & BD',k:['sales','rfp','proposal','pipeline','crm']},{l:'HR & Talent',k:['hr','talent','recruit','employee','hiring','payroll']},{l:'Engineering',k:['code','developer','engineering','api','deploy']},{l:'Customer Experience',k:['customer','support','ticket','satisfaction']},{l:'Operations',k:['operations','process','workflow','automation','report','efficiency']},{l:'Strategy',k:['strategy','consulting','transformation','advisory']}];
+  let domain='Operations',ds=0; dm.forEach(d=>{const h=d.k.filter(k=>all.includes(k));if(h.length>ds){ds=h.length;domain=d.l;}});
+  const isClient=all.includes('client')||all.includes('pitch')||all.includes('rfp');
+  const isRepeat=all.includes('weekly')||all.includes('every')||all.includes('monthly');
+  let pkg,pcls; if(isClient){pkg='Yes — show clients';pcls='t-purple';}else if(isRepeat){pkg='Possibly';pcls='t-blue';}else{pkg='Internal';pcls='t-gray';}
+  const wdAreas=[{a:'Compensation & Benefits',k:['comp','compensation','salary','merit','pay','bonus']},{a:'Data Conversion',k:['data conversion','migration','cutover','iload']},{a:'Integrations',k:['integration','studio','eib','web service','rest','inbound','outbound']},{a:'Reporting & Analytics',k:['report','dashboard','calculated field']},{a:'Core HCM',k:['hcm','hire','terminate','worker','position','staffing']},{a:'Payroll',k:['payroll','pay run','payslip','gross','net pay']},{a:'Absence & Leave',k:['absence','leave','time off','accrual','pto']},{a:'Recruiting',k:['recruit','requisition','candidate','offer']},{a:'Testing & QA',k:['test','uat','test script','defect','regression']},{a:'Security & Config',k:['security','domain','business process','permission']},{a:'Change & Enablement',k:['change management','hypercare','go-live','readiness']}];
+  let wdArea=null,wds=0; wdAreas.forEach(a=>{const h=a.k.filter(k=>all.includes(k));if(h.length>wds){wds=h.length;wdArea=a.a;}});
+  const isWD=wds>0||all.includes('workday')||all.includes('wday');
+  const dEl=document.getElementById('uc-cat-domain'); dEl.textContent=domain; dEl.className='tag t-purple';
+  const pEl=document.getElementById('uc-cat-pkg'); pEl.textContent=pkg; pEl.className='tag '+pcls;
+  const wEl=document.getElementById('uc-cat-wd'); wEl.textContent=isWD?'Workday':'Not Workday'; wEl.className='tag '+(isWD?'t-workday':'t-gray');
+  document.getElementById('uc-cat-wd-area').textContent=isWD&&wdArea?'→ '+wdArea:'';
+  sol.ucDomain=domain; sol.ucPkg=pkg; sol.ucWD=isWD?'Workday':'Not Workday'; sol.ucWDArea=isWD?(wdArea||'General Workday'):'';
+  document.getElementById('uc-review-prompt-box').textContent = REVIEW_PROMPT;
+  const btn=document.getElementById('uc-submit-btn'); btn.disabled=false; btn.className='btn-submit teal'; document.getElementById('uc-submit-label').textContent='📤 Submit to Smartsheet';
+}
+
+// ── CLASSIFY ───────────────────────────────────────────────────
+function classify(name,desc,func,tools,cat,success) {
+  const all=(name+' '+desc+' '+func+' '+success+' '+(tools||'')).toLowerCase();
+  const dm=[{l:'Project Management',k:['project','sprint','milestone','roadmap','jira']},{l:'Legal & Compliance',k:['contract','legal','clause','compliance','nda','msa','gdpr','policy']},{l:'Finance',k:['finance','invoice','budget','forecast','revenue','cost','pricing']},{l:'Sales & BD',k:['sales','rfp','proposal','pipeline','crm','opportunity','pitch']},{l:'HR & Talent',k:['hr','talent','recruit','onboard','employee','hiring','payroll']},{l:'Engineering',k:['code','developer','engineering','api','deploy','devops','github']},{l:'Customer Experience',k:['customer','support','ticket','satisfaction','nps','feedback']},{l:'Operations',k:['operations','process','workflow','automation','report','dashboard','efficiency']},{l:'Strategy',k:['strategy','consulting','transformation','advisory']}];
+  let domain='Operations',ds=0,dw=''; dm.forEach(d=>{const h=d.k.filter(k=>all.includes(k));if(h.length>ds){ds=h.length;domain=d.l;dw=h.slice(0,3).join(', ');}});
+  sol.catDomain=domain;
+  const hasInt=tools&&tools.trim().length>2, isAgent=(cat||'').toLowerCase().includes('agent')||all.includes('agent');
+  let cx,ccls,cw; if(isAgent){cx='Strategic programme';ccls='t-red';cw='Agentic — needs planning';}else if(hasInt){cx='Medium build';ccls='t-amber';cw='Needs '+tools.split(',')[0].trim()+' connection';}else{cx='Quick win';ccls='t-green';cw='Works natively — start tomorrow';}
+  sol.catComplex=cx;
+  const isClient=all.includes('client')||all.includes('pitch')||all.includes('rfp')||all.includes('proposal');
+  const isRepeat=all.includes('weekly')||all.includes('monthly')||all.includes('every');
+  const isHiVal=all.includes('revenue')||all.includes('win rate')||all.includes('commercial');
+  let pkg,pcls,pw; if(isClient&&(isHiVal||isRepeat)){pkg='Yes — sell to clients';pcls='t-purple';pw='Client-facing + commercial value';}else if(isClient||isRepeat){pkg='Possibly — show clients';pcls='t-blue';pw='Client-relevant or repeatable';}else{pkg='Internal use';pcls='t-gray';pw='Improves internal productivity';}
+  sol.catPkg=pkg;
+  const fl=(func||'').toLowerCase(); let svc,sw; if(fl.includes('engineering')||cat==='Code Assistance'){svc='Technology';sw='Engineering / code focus';}else if(fl.includes('operations')||cat==='Data & Automation'){svc='Operations';sw='Process & automation';}else{svc='Strategy & Consulting';sw='Business function focus';}
+  sol.catService=svc;
+  const wdAreas=[{a:'Compensation & Benefits',k:['comp','compensation','salary','merit','pay','bonus','total rewards']},{a:'Data Conversion',k:['data conversion','migration','cutover','iload','conversion workbook']},{a:'Integrations',k:['integration','studio','eib','web service','rest','soap','middleware']},{a:'Reporting & Analytics',k:['report','dashboard','calculated field','matrix report']},{a:'Core HCM',k:['hcm','hire','terminate','worker','position','staffing']},{a:'Payroll',k:['payroll','pay run','payslip','gross','net pay','deduction']},{a:'Absence & Leave',k:['absence','leave','time off','accrual','pto']},{a:'Recruiting',k:['recruit','requisition','candidate','offer','applicant']},{a:'Learning',k:['learning','lms','course','certification']},{a:'Financial Management',k:['financials','accounting','ledger','invoice','expense']},{a:'Adaptive Planning',k:['adaptive','planning','forecast','budget model']},{a:'Testing & QA',k:['test','uat','test script','defect','regression','validation']},{a:'Security & Config',k:['security','domain','business process','permission']},{a:'Change & Enablement',k:['change management','hypercare','go-live','readiness','adoption']}];
+  let wdArea=null,wds=0,wdw=''; wdAreas.forEach(a=>{const h=a.k.filter(k=>all.includes(k));if(h.length>wds){wds=h.length;wdArea=a.a;wdw=h.slice(0,3).join(', ');}});
+  const isWD=wds>0||all.includes('workday')||all.includes('wday');
+  sol.catWD=isWD?'Workday':'Not Workday'; sol.catWDArea=isWD?(wdArea||'General Workday'):''; sol.catWDWhy=isWD?'Keywords: '+wdw:'No Workday terms found';
+  se('cat-domain-val',domain); se('cat-domain-why',dw?'Keywords: '+dw:'');
+  const cxEl=document.getElementById('cat-complex-val'); cxEl.textContent=cx; cxEl.className='tag '+ccls; se('cat-complex-why',cw);
+  const pxEl=document.getElementById('cat-package-val'); pxEl.textContent=pkg; pxEl.className='tag '+pcls; se('cat-package-why',pw);
+  se('cat-service-val',svc); se('cat-service-why',sw);
+  const wdEl=document.getElementById('cat-wd-val'); wdEl.textContent=sol.catWD; wdEl.className='tag '+(isWD?'t-workday':'t-gray');
+  se('cat-wd-area',sol.catWDArea?'→ '+sol.catWDArea:''); se('cat-wd-why',sol.catWDWhy);
+}
+
+// ── UTILS ──────────────────────────────────────────────────────
+function v(id){return(document.getElementById(id)||{}).value||'';}
+function sv(id,val){const el=document.getElementById(id);if(el)el.value=val;}
+function se(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+function toggleAcc(id){const b=document.getElementById(id+'-body'),a=document.getElementById(id+'-arrow');const o=b.classList.toggle('show');a.classList.toggle('open',o);}
+
+// ── COPY HELPERS ───────────────────────────────────────────────
+function copySolution(){navigator.clipboard.writeText(['SKILL: '+v('f-name'),'\nSUMMARY:\n'+(v('rev-summary')||v('f-desc')),'\nPROBLEM:\n'+(sol.problem||''),'\nSOLUTION:\n'+(sol.solution||''),'\nSTEPS:\n'+(sol.steps||[]).map((s,i)=>`${i+1}. ${s}`).join('\n'),'\nWATCH OUT FOR:\n'+(sol.risks||[]).join('\n'),'\nWIN:\n'+(sol.kpi||'')].join('\n'));toast('✓ Solution copied');}
+
+const REVIEW_PROMPT=`I've uploaded the Accenture Claude Skills Repository (Excel file with two sheets: "Use Case Repository" and "Claude Skills Library").
+
+Your job has THREE parts. Work through them in order.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 1 — QUALITY REVIEW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Review every row with status "Backlog" or "Planned". For each row give:
+1. QUALITY SCORE (1–5): problem clarity, solution fit, readiness, business impact
+2. FLAGS: missing information that would block implementation
+3. ONE improvement suggestion
+4. PRIORITY: Fast-track / Normal / Needs rework
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 2 — TWO-WAY LINKING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+A) Skills with no use cases → generate 3–5 specific Accenture use cases each
+B) Use cases with no skill → match to existing skill or propose a new one
+C) Thin summaries → rewrite in plain English
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PART 3 — WEEKLY ACTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- TOP 3 to fast-track this week
+- ORPHAN COUNT: skills without use cases / use cases without a skill
+- ONE missing skill or use case the repository needs
+
+RULES: No hallucination. Only use what is in the sheet.`;
+
+function copyReviewPrompt(){navigator.clipboard.writeText(REVIEW_PROMPT);toast('✓ Review prompt copied');}
+function copyWithContext(){navigator.clipboard.writeText('SKILL: '+v('f-name')+'\n'+v('f-desc')+'\nFunction: '+v('f-func')+' | Tools: '+v('f-tools')+'\nWin: '+v('f-success')+'\n---\n'+REVIEW_PROMPT);toast('✓ Skill + prompt copied');}
+
+// ── RESET ──────────────────────────────────────────────────────
+function resetAll(){
+  ['f-name','f-desc','f-success','f-tools','f-submitter','rev-summary'].forEach(id=>sv(id,''));
+  ['f-cat','f-func','uc-func','uc-priority'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  ['uc-problem','uc-who','uc-outcome','uc-tools','uc-submitter','uc-rev-summary'].forEach(id=>sv(id,''));
+  sol={};
+  document.getElementById('sol-container').innerHTML='';
+  ['cat-domain-val','cat-complex-val','cat-package-val','cat-service-val','cat-wd-val'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
+  ['cat-domain-why','cat-complex-why','cat-package-why','cat-service-why','cat-wd-why','cat-wd-area'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='';});
+  [1,2,3].forEach(i=>{const p=document.getElementById('uc'+i);if(p)p.classList.remove('show');});
+  document.getElementById('chooser').style.display='block';
+  document.getElementById('dot-row').style.display='none';
+  document.getElementById('step-label').style.display='none';
+  mode='none'; setStep(1);
+  [1,2,3].forEach(i=>{const p=document.getElementById('p'+i);if(p)p.classList.remove('show');});
+}
+
+syncStatus();
+</script>
+</body>
+</html>
