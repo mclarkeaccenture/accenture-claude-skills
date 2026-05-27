@@ -1504,8 +1504,123 @@ Write a 3-paragraph executive status update for a steering committee:
 
 Format: Use headers for each task. Be specific — reference actual items from the data.`,
 
+  // ── CSV utilities ──────────────────────────────────────────────
+  strip(html) { return html.replace(/<[^>]+>/g, ''); },
+
+  toCSV(rows) {
+    return rows.map(r =>
+      r.map(cell => {
+        const s = String(cell == null ? '' : cell).replace(/"/g, '""');
+        return /[,"\n\r]/.test(s) ? `"${s}"` : s;
+      }).join(',')
+    ).join('\r\n');
+  },
+
+  dlCSV(filename, rows) {
+    const csv = '﻿' + this.toCSV(rows); // BOM → opens cleanly in Excel
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+    toast('✓ Downloaded ' + filename);
+  },
+
+  // ── Pre-populated row data ──────────────────────────────────────
+
+  kbRows() {
+    const hdr = ['ID','Category','Title','Description','Steps','Tip','Common Errors'];
+    return [hdr, ...QA.data.map(t => [
+      t.id,
+      (QA.cats[t.cat] || t.cat).replace(/^[^\w]+/, '').trim(),
+      t.title,
+      t.desc,
+      t.steps.map(s => this.strip(s)).join(' | '),
+      t.tip ? this.strip(t.tip) : '',
+      t.err  ? this.strip(t.err)  : ''
+    ])];
+  },
+
+  configRows() {
+    const hdr = ['Config Item','Module','Status','Owner','Due Date','Go-Live Impact','Notes / Blockers'];
+    return [hdr,
+      ['Grade Structure & Grades',                     'Core Setup',  'Not Started','','','Critical', 'Must complete before grade profiles'],
+      ['Grade Profile — US Salaried',                  'Core Setup',  'Not Started','','','Critical', ''],
+      ['Grade Profile — US Hourly',                    'Core Setup',  'Not Started','','','Critical', ''],
+      ['Grade Profile — UK',                           'Core Setup',  'Not Started','','','High',     ''],
+      ['Grade Profile — Canada',                       'Core Setup',  'Not Started','','','High',     ''],
+      ['Compensation Package Design',                  'Core Setup',  'Not Started','','','Critical', ''],
+      ['Salary Plan — US',                             'Core Setup',  'Not Started','','','Critical', ''],
+      ['Hourly Plan — US',                             'Core Setup',  'Not Started','','','Critical', ''],
+      ['Eligibility Rule — Merit US Full Time',        'Merit',       'Not Started','','','Critical', ''],
+      ['Eligibility Rule — Merit US Part Time',        'Merit',       'Not Started','','','High',     ''],
+      ['Review Period — Annual Merit Cycle',           'Merit',       'Not Started','','','Critical', ''],
+      ['Merit Plan — US',                              'Merit',       'Not Started','','','Critical', ''],
+      ['Merit Budget Configuration',                   'Merit',       'Not Started','','','Critical', ''],
+      ['Merit Matrix Setup',                           'Merit',       'Not Started','','','High',     ''],
+      ['Bonus Plan — Annual Incentive',                'Bonus',       'Not Started','','','High',     ''],
+      ['Bonus Eligibility Rule',                       'Bonus',       'Not Started','','','High',     ''],
+      ['OTP Plan — Spot Bonus',                        'OTP',         'Not Started','','','High',     ''],
+      ['OTP Plan — Referral Bonus',                    'OTP',         'Not Started','','','Medium',   ''],
+      ['Allowance Plan — Car (UK)',                    'Allowance',   'Not Started','','','Medium',   'UK scope only'],
+      ['Stock Plan — RSU',                             'Stock',       'Not Started','','','Medium',   'Confirm with equity team'],
+      ['Compensation Change Reason Matrix',            'Core Setup',  'Not Started','','','Critical', 'Must align with payroll integration'],
+      ['Currency Rates — All Required Pairs',          'Core Setup',  'Not Started','','','High',     ''],
+      ['Security Role — Compensation Administrator',   'Security',    'Not Started','','','Critical', ''],
+      ['Security Role — Comp Partner (Constrained)',   'Security',    'Not Started','','','Critical', ''],
+      ['Security Role — Manager Self-Service',         'Security',    'Not Started','','','High',     ''],
+      ['EIB Template — Compensation Mass Update',      'EIB',         'Not Started','','','High',     ''],
+      ['EIB Template — Grade Profile Assignment',      'EIB',         'Not Started','','','High',     ''],
+      ['Payroll Integration Mapping',                  'Integration', 'Not Started','','','Critical', 'Coordinate with integration workstream'],
+      ['Compensation Extract Configuration',           'Integration', 'Not Started','','','Critical', ''],
+      ['UAT Test Scripts — Merit Cycle',               'Testing',     'Not Started','','','Critical', ''],
+      ['UAT Test Scripts — OTP & Bonus Payout',        'Testing',     'Not Started','','','High',     ''],
+    ];
+  },
+
+  raidRows() {
+    const hdr = ['ID','Type','Description','Probability','Impact','Mitigation / Resolution','Owner','Due Date','Status'];
+    return [hdr,
+      ['R-001','Risk',    'EIB date format mismatch (MM/DD vs DD/MM) causes load failures in non-US tenants','High','High',      'Confirm tenant date format in sandbox before first load. Document in EIB guide.','','','Open'],
+      ['R-002','Risk',    'Merit lock date not communicated to managers — late submissions require admin override','Medium','High','Include lock date in manager comms pack. Send calendar invite to all managers.','','','Open'],
+      ['R-003','Risk',    'Payroll change reason mapping incomplete at go-live — OTP payments miss payroll run','High','Critical', 'Integration team to confirm all change reasons mapped 2 weeks before cutover.','','','Open'],
+      ['R-004','Risk',    'Currency exchange rates not loaded for all pairs — compa ratio shows 0 for non-USD workers','Medium','High','Set up currency rate load process in parallel with comp config. Test with non-USD workers.','','','Open'],
+      ['R-005','Risk',    'Compensation Partner security not constrained — access too broad, fails audit','Low','Critical',        'Use Constrained Security Group tied to supervisory org. Test with Comp Partner user.','','','Open'],
+      ['R-006','Risk',    'Grade profile midpoint missing — compa ratio = 0 for affected population','Medium','High',             'Run Compensation Audit Report before merit cycle launch to catch all gaps.','','','Open'],
+      ['R-007','Risk',    'Merit matrix effective date is after merit increase date — matrix silently dropped','Medium','High',    'Verify matrix effective date is on or before merit increase date in sandbox.','','','Open'],
+      ['I-001','Issue',   'Client HR Admin does not have Compensation Administrator role in sandbox — blocking UAT','N/A','High', 'Assign Compensation Administrator role to client test user account.','','','Open'],
+      ['D-001','Decision','Confirm whether bonus target % should appear in offer letters (Include in TTC flag)','N/A','High',     '','','','Open'],
+      ['D-002','Decision','Confirm merit budget method: % of eligible salary vs flat amount per org','N/A','High',               '','','','Open'],
+      ['D-003','Decision','Confirm merit lock date for annual cycle — HR leadership to decide','N/A','Medium',                   '','','','Open'],
+      ['D-004','Decision','Confirm whether Comp Partners should be able to see comp history before their assignment date','N/A','Medium','','','','Open'],
+      ['A-001','Action',  'Share EIB template with client HR team for data prep ahead of testing','N/A','Medium',               '','','','Open'],
+      ['A-002','Action',  'Confirm payroll go-live date with integration workstream lead','N/A','High',                         '','','','Open'],
+    ];
+  },
+
+  eibRows() {
+    return [['Load Date','EIB Name','Total Rows','Error Count','Error Description','Root Cause','Resolution','Status']];
+  },
+
+  decisionsRows() {
+    return [['Date Raised','Decision Topic','Options Presented','Decision Made','Decided By','Workday Impact','Status']];
+  },
+
   schemas: [
-    { name: 'Compensation Configuration Tracker', status: 'ready',
+    { name: 'Workday Comp Knowledge Base', status: 'ready', key: 'kb',
+      desc: '17 reference topics — steps, tips, and error codes for every Workday Compensation area.',
+      cols: [
+        { col: 'ID',            type: 'Number',   note: '1–17' },
+        { col: 'Category',      type: 'Dropdown', note: 'Setup, Data Loads, Fix Issues, Security, Process' },
+        { col: 'Title',         type: 'Text',     note: 'e.g., Grade Profile Configuration' },
+        { col: 'Description',   type: 'Text',     note: 'One-line summary of the topic' },
+        { col: 'Steps',         type: 'Text',     note: 'Pipe-separated step list' },
+        { col: 'Tip',           type: 'Text',     note: 'Pro tip or best practice' },
+        { col: 'Common Errors', type: 'Text',     note: 'Error patterns and root causes' }
+      ]},
+    { name: 'Compensation Configuration Tracker', status: 'ready', key: 'config',
+      desc: '31 pre-seeded config items covering all Workday Compensation modules.',
       cols: [
         { col: 'Config Item',       type: 'Text',        note: 'e.g., Grade Profile — US Salaried' },
         { col: 'Module',            type: 'Dropdown',    note: 'Merit, Bonus, Allowance, OTP, Stock' },
@@ -1515,7 +1630,8 @@ Format: Use headers for each task. Be specific — reference actual items from t
         { col: 'Go-Live Impact',    type: 'Dropdown',    note: 'Critical, High, Medium, Low' },
         { col: 'Notes / Blockers',  type: 'Text',        note: 'Freeform — dependencies, blockers' }
       ]},
-    { name: 'RAID Log', status: 'ready',
+    { name: 'RAID Log', status: 'ready', key: 'raid',
+      desc: '14 pre-seeded rows — 7 risks, 1 issue, 4 decisions, 2 actions common to Workday Comp implementations.',
       cols: [
         { col: 'ID',                type: 'Auto-number', note: 'Auto-generated' },
         { col: 'Type',              type: 'Dropdown',    note: 'Risk, Action, Issue, Decision' },
@@ -1527,7 +1643,8 @@ Format: Use headers for each task. Be specific — reference actual items from t
         { col: 'Due Date',          type: 'Date',        note: '' },
         { col: 'Status',            type: 'Dropdown',    note: 'Open, In Progress, Closed' }
       ]},
-    { name: 'EIB Error Tracker', status: 'needs-data',
+    { name: 'EIB Error Tracker', status: 'needs-data', key: 'eib',
+      desc: 'Headers only — populate during project as EIB loads are run.',
       cols: [
         { col: 'Load Date',         type: 'Date',        note: '' },
         { col: 'EIB Name',          type: 'Text',        note: 'e.g., Merit Update — US Q2 2025' },
@@ -1538,7 +1655,8 @@ Format: Use headers for each task. Be specific — reference actual items from t
         { col: 'Resolution',        type: 'Text',        note: '' },
         { col: 'Status',            type: 'Dropdown',    note: 'Open, Resolved, Waived' }
       ]},
-    { name: 'Decisions Log', status: 'pending',
+    { name: 'Decisions Log', status: 'pending', key: 'decisions',
+      desc: 'Headers only — open decisions are seeded in the RAID Log. Move to this sheet once decided.',
       cols: [
         { col: 'Date Raised',       type: 'Date',        note: '' },
         { col: 'Decision Topic',    type: 'Text',        note: '' },
@@ -1550,8 +1668,17 @@ Format: Use headers for each task. Be specific — reference actual items from t
       ]}
   ],
 
-  statusLabel: { ready: 'Ready for analysis', 'needs-data': 'Needs data', pending: 'Pending setup' },
+  statusLabel: { ready: 'Ready — data populated', 'needs-data': 'Needs data', pending: 'Headers only' },
   statusDot:   { ready: 's-green', 'needs-data': 's-orange', pending: 's-grey' },
+
+  // Map schema key → row generator
+  rowFn: { kb:'kbRows', config:'configRows', raid:'raidRows', eib:'eibRows', decisions:'decisionsRows' },
+
+  rowCount(key) {
+    const rows = this[this.rowFn[key]]();
+    const data = rows.length - 1;
+    return data > 0 ? `${data} row${data > 1 ? 's' : ''}` : 'Headers only';
+  },
 
   render() {
     const el = document.getElementById('ss-root');
@@ -1561,45 +1688,51 @@ Format: Use headers for each task. Be specific — reference actual items from t
         <div class="prompt-card-header">
           <div>
             <h2>📋 Batch Claude Prompt</h2>
-            <p>Copy this prompt, paste your Smartsheet data below it, then send to Claude.<br>It will find gaps, flag risks, and write your weekly status update.</p>
+            <p>Copy this prompt, paste your Smartsheet data below it, then send to Claude.<br>Finds config gaps, flags RAID risks, and writes your weekly status update.</p>
           </div>
           <button class="btn btn-secondary btn-sm" onclick="copy(SS.prompt,'Prompt copied!')" style="flex-shrink:0;margin-top:4px">📋 Copy</button>
         </div>
         <div class="prompt-code">${this.prompt.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
       </div>
 
+      <!-- DOWNLOAD CARD -->
+      <div class="card">
+        <div class="sec-title">Smartsheet Downloads</div>
+        <div class="sec-sub">Each CSV is pre-populated with reference data. Download → open Smartsheet → Import CSV (or paste rows manually).</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${this.schemas.map(s => {
+            const count = this.rowCount(s.key);
+            const dotCls = this.statusDot[s.status];
+            const labelTxt = this.statusLabel[s.status];
+            return `<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--fill-2);border-radius:12px;border:0.5px solid var(--separator)">
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:600;font-size:13.5px;margin-bottom:3px">${s.name}</div>
+                <div style="font-size:12px;color:var(--text-2)">${s.desc || ''}</div>
+                <div style="font-size:11px;color:var(--text-3);margin-top:4px"><span class="sdot ${dotCls}" style="vertical-align:middle"></span>${labelTxt} · ${count}</div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="SS.dlCSV('${s.name.replace(/[^a-z0-9]/gi,'_')}.csv', SS.${this.rowFn[s.key]}())" style="flex-shrink:0">📥 CSV</button>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="info-box" style="margin-top:14px">
+          💡 <strong>Import tip:</strong> In Smartsheet, go to the sheet → <em>File → Import → CSV / Excel</em> → choose the downloaded file. Column headers map automatically if they match the schema above.
+        </div>
+      </div>
+
       <!-- SCHEMA CARD -->
       <div class="card">
-        <div class="sec-title">Sheet Schemas</div>
-        <div class="sec-sub">Column definitions for each Smartsheet tracker. Use these when setting up new sheets or auditing existing ones.</div>
+        <div class="sec-title">Column Schemas</div>
+        <div class="sec-sub">Reference for setting up or auditing each sheet. Column names in the CSV match these exactly.</div>
         ${this.schemas.map((s, i) => `
           ${i > 0 ? '<hr class="divider">' : ''}
           <div class="sheet-header">
-            <strong>${s.name}</strong>
+            <strong style="font-size:14px">${s.name}</strong>
             <span class="sheet-status"><span class="sdot ${this.statusDot[s.status]}"></span>${this.statusLabel[s.status]}</span>
           </div>
           <table class="schema-tbl">
             <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
             <tbody>${s.cols.map(c => `<tr><td><strong>${c.col}</strong></td><td style="color:var(--text-2)">${c.type}</td><td style="color:var(--text-2)">${c.note}</td></tr>`).join('')}</tbody>
           </table>`).join('')}
-      </div>
-
-      <!-- STATUS CARD -->
-      <div class="card">
-        <div class="sec-title">Sync Status</div>
-        <table class="schema-tbl">
-          <thead><tr><th>Sheet</th><th>Status</th><th>Next Action</th></tr></thead>
-          <tbody>
-            <tr><td>Compensation Configuration Tracker</td><td><span class="sdot s-green"></span>Ready</td><td>Paste data into batch prompt</td></tr>
-            <tr><td>RAID Log</td><td><span class="sdot s-green"></span>Ready</td><td>Paste data into batch prompt</td></tr>
-            <tr><td>EIB Error Tracker</td><td><span class="sdot s-orange"></span>Needs data</td><td>Load EIB error logs then paste</td></tr>
-            <tr><td>Decisions Log</td><td><span class="sdot s-grey"></span>Pending setup</td><td>Create sheet using schema above</td></tr>
-          </tbody>
-        </table>
-        <div class="info-box">
-          💡 <strong>Workflow:</strong> Copy the batch prompt → open Claude → paste prompt → paste your Smartsheet data below → send. No API key needed — manual batch analysis.<br><br>
-          🔁 <strong>Once Power Automate flows are live</strong>, the Q&amp;A Reference and submission forms will sync directly. Use Settings ⚙️ in the Skills Hub to add your webhook URLs.
-        </div>
       </div>`;
   }
 };
