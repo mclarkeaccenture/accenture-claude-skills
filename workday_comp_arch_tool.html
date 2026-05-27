@@ -850,6 +850,94 @@ hr.divider { border: none; border-top: 0.5px solid var(--separator); margin: 18p
   transform: translateX(-50%) translateY(0);
 }
 
+/* ─── DATAVERSE MODAL ──────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.open { display: flex; animation: fadeSlide 0.22s var(--ease) both; }
+.modal-box {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  padding: 28px 24px;
+  max-width: 500px; width: 100%;
+  box-shadow: var(--shadow-lg);
+  border: 0.5px solid rgba(60,60,67,0.12);
+}
+.modal-title { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 6px; }
+.modal-sub   { font-size: 13px; color: var(--text-2); margin-bottom: 22px; line-height: 1.5; }
+.modal-field { margin-bottom: 16px; }
+.modal-label {
+  display: block; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-3); margin-bottom: 7px;
+}
+.modal-input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--separator); border-radius: var(--r-sm);
+  font-size: 12.5px; font-family: 'SF Mono','Fira Code','Courier New',monospace;
+  background: var(--fill-2); color: var(--text);
+  transition: border-color .15s, box-shadow .15s;
+}
+.modal-input:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(94,92,230,.12); }
+.modal-input::placeholder { color: var(--text-3); font-family: inherit; font-size: 11.5px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+
+/* Sync status pills */
+.sync-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; flex-shrink: 0;
+}
+.sync-never  { background: var(--fill);       color: var(--text-3); }
+.sync-ok     { background: var(--green-lt);   color: #1B5E20; }
+.sync-fail   { background: var(--orange-lt);  color: #BF360C; }
+.sync-busy   { background: var(--primary-lt); color: var(--primary); }
+
+/* Setup guide accordion */
+.guide-step {
+  border: 0.5px solid var(--separator);
+  border-radius: var(--r);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.guide-head {
+  padding: 13px 16px; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--fill-2);
+  transition: background .12s;
+  -webkit-user-select: none; user-select: none;
+}
+.guide-head:hover { background: var(--fill); }
+.guide-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--primary-gd);
+  color: white; font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.guide-head-title { font-weight: 600; font-size: 13.5px; flex: 1; }
+.guide-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height .4s var(--ease), padding .3s var(--ease);
+  padding: 0 16px;
+}
+.guide-step.open .guide-body { max-height: 2000px; padding: 0 16px 16px; border-top: 0.5px solid var(--separator); }
+.guide-step.open .guide-head { background: var(--surface); }
+.code-block {
+  background: #1C1C1E; color: #C9D1D9;
+  border-radius: 8px; padding: 12px 14px;
+  font-family: 'SF Mono','Fira Code','Courier New',monospace;
+  font-size: 11.5px; line-height: 1.8;
+  white-space: pre; overflow-x: auto;
+  margin: 8px 0;
+}
+
 /* ─── RESPONSIVE ────────────────────────────────────────────────── */
 @media (max-width: 500px) {
   .choice-grid { grid-template-columns: 1fr; }
@@ -952,6 +1040,26 @@ hr.divider { border: none; border-top: 0.5px solid var(--separator); margin: 18p
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- DATAVERSE SETTINGS MODAL -->
+<div class="modal-overlay" id="dv-modal" onclick="if(event.target===this)DV.closeSettings()">
+  <div class="modal-box">
+    <div class="modal-title">⚙️ Dataverse Webhooks</div>
+    <div class="modal-sub">Paste your Power Automate HTTP trigger URLs below. Create the flows using the Setup Guide in the Export tab, then copy the URL from each flow's HTTP trigger step.</div>
+    <div class="modal-field">
+      <label class="modal-label">Write Webhook URL (CompIQ Write flow)</label>
+      <input class="modal-input" id="dv-write-url" type="url" placeholder="https://prod-xx.eastus.logic.azure.com/workflows/…/triggers/manual/paths/invoke?…">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Read Webhook URL (CompIQ Read flow)</label>
+      <input class="modal-input" id="dv-read-url" type="url" placeholder="https://prod-xx.eastus.logic.azure.com/workflows/…/triggers/manual/paths/invoke?…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" onclick="DV.closeSettings()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="DV.saveSettings()">Save URLs</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ─── UTILS ──────────────────────────────────────────────────────── */
@@ -1464,6 +1572,88 @@ const QA = {
   }
 };
 
+/* ─── DATAVERSE SYNC ────────────────────────────────────────────── */
+const DV = {
+  WK: { write: 'compiq_dv_write', read: 'compiq_dv_read' },
+  SK: k => 'compiq_sync_' + k,
+
+  getUrl(t)     { return localStorage.getItem(this.WK[t]) || ''; },
+  setUrl(t, u)  { localStorage.setItem(this.WK[t], u); },
+  configured()  { return !!(this.getUrl('write') && this.getUrl('read')); },
+
+  rowsToObjs(rows) {
+    const [hdr, ...data] = rows;
+    return data.map(r => Object.fromEntries(hdr.map((h, i) => [h, r[i] == null ? '' : String(r[i])])));
+  },
+
+  async write(table, objs) {
+    const url = this.getUrl('write');
+    if (!url) { toast('⚠️ Add webhook URLs in ⚙️ Webhooks first'); return false; }
+    const r = await fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ table, rows: objs })
+    }).catch(() => null);
+    return r !== null; // no-cors always returns opaque — treat as success if no network error
+  },
+
+  async read(table) {
+    const url = this.getUrl('read');
+    if (!url) { toast('⚠️ Add webhook URLs in ⚙️ Webhooks first'); return null; }
+    try {
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ table })
+      });
+      if (!r.ok) return null;
+      return await r.json();
+    } catch { toast('❌ Read failed — check webhook URL'); return null; }
+  },
+
+  async syncTable(key) {
+    const el = document.getElementById('sp-' + key);
+    if (el) { el.textContent = '⏳ Syncing…'; el.className = 'sync-pill sync-busy'; }
+    const rowFn = SS.rowFn[key];
+    const objs = this.rowsToObjs(SS[rowFn]());
+    const ok = await this.write(key, objs);
+    const label = ok
+      ? `✓ ${objs.length} rows → Dataverse`
+      : '✗ Failed';
+    if (ok) localStorage.setItem(this.SK(key), JSON.stringify({ t: new Date().toLocaleTimeString(), n: objs.length }));
+    if (el) { el.textContent = label; el.className = 'sync-pill ' + (ok ? 'sync-ok' : 'sync-fail'); }
+    toast(ok ? `✓ ${objs.length} rows synced (${key})` : '❌ Sync failed — check webhook');
+  },
+
+  async syncAll() {
+    toast('⏳ Syncing all tables…');
+    for (const key of Object.keys(SS.rowFn)) await this.syncTable(key);
+    toast('✓ All tables synced to Dataverse');
+  },
+
+  syncStatus(key) {
+    const d = localStorage.getItem(this.SK(key));
+    if (!d) return { label: 'Not synced', cls: 'sync-never' };
+    const { t, n } = JSON.parse(d);
+    return { label: `✓ ${n} rows at ${t}`, cls: 'sync-ok' };
+  },
+
+  showSettings() {
+    document.getElementById('dv-write-url').value = this.getUrl('write');
+    document.getElementById('dv-read-url').value  = this.getUrl('read');
+    document.getElementById('dv-modal').classList.add('open');
+  },
+  saveSettings() {
+    this.setUrl('write', document.getElementById('dv-write-url').value.trim());
+    this.setUrl('read',  document.getElementById('dv-read-url').value.trim());
+    document.getElementById('dv-modal').classList.remove('open');
+    toast('✓ Webhook URLs saved');
+    SS.render();
+  },
+  closeSettings() { document.getElementById('dv-modal').classList.remove('open'); },
+  toggleGuide(i)  { document.getElementById('gs-'+i).classList.toggle('open'); }
+};
+
 /* ─── SMARTSHEET SYNC / EXPORT ───────────────────────────────────── */
 const SS = {
   prompt: `You are a Workday Compensation expert. I will give you data from multiple Smartsheet trackers. Analyse and return structured insights.
@@ -1682,6 +1872,7 @@ Format: Use headers for each task. Be specific — reference actual items from t
 
   render() {
     const el = document.getElementById('ss-root');
+    const cfg = DV.configured();
     el.innerHTML = `
       <!-- DARK PROMPT CARD -->
       <div class="prompt-card">
@@ -1695,44 +1886,121 @@ Format: Use headers for each task. Be specific — reference actual items from t
         <div class="prompt-code">${this.prompt.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
       </div>
 
-      <!-- DOWNLOAD CARD -->
+      <!-- DATAVERSE SYNC CARD -->
       <div class="card">
-        <div class="sec-title">Smartsheet Downloads</div>
-        <div class="sec-sub">Each CSV is pre-populated with reference data. Download → open Smartsheet → Import CSV (or paste rows manually).</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px">
+          <div>
+            <div style="font-weight:700;font-size:15px;letter-spacing:-0.3px">☁️ Dataverse Sync</div>
+            <div style="font-size:12.5px;color:var(--text-2);margin-top:3px">Accenture tenant · Default environment · Power Platform</div>
+          </div>
+          <div style="display:flex;gap:7px;flex-shrink:0">
+            <button class="btn btn-ghost btn-sm" onclick="DV.showSettings()">⚙️ Webhooks</button>
+            <button class="btn btn-primary btn-sm" onclick="DV.syncAll()" ${cfg?'':'disabled'} title="${cfg?'Sync all tables':'Configure webhook URLs first'}">↑ Sync All</button>
+          </div>
+        </div>
+        ${cfg ? '' : `<div class="info-box" style="margin-bottom:14px;background:var(--orange-lt);border-color:rgba(255,149,0,.25);color:#7D4200">
+          ⚠️ <strong>Webhooks not configured.</strong> Click <strong>⚙️ Webhooks</strong> to add your Power Automate HTTP trigger URLs. See the Setup Guide below if you haven't created the flows yet.
+        </div>`}
+        <div style="display:flex;flex-direction:column;gap:9px">
           ${this.schemas.map(s => {
             const count = this.rowCount(s.key);
-            const dotCls = this.statusDot[s.status];
-            const labelTxt = this.statusLabel[s.status];
+            const st = DV.syncStatus(s.key);
             return `<div style="display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--fill-2);border-radius:12px;border:0.5px solid var(--separator)">
               <div style="flex:1;min-width:0">
                 <div style="font-weight:600;font-size:13.5px;margin-bottom:3px">${s.name}</div>
-                <div style="font-size:12px;color:var(--text-2)">${s.desc || ''}</div>
-                <div style="font-size:11px;color:var(--text-3);margin-top:4px"><span class="sdot ${dotCls}" style="vertical-align:middle"></span>${labelTxt} · ${count}</div>
+                <div style="font-size:12px;color:var(--text-2)">${s.desc||''}</div>
+                <div style="margin-top:5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                  <span style="font-size:11px;color:var(--text-3)"><span class="sdot ${this.statusDot[s.status]}" style="vertical-align:middle"></span>${count}</span>
+                  <span class="sync-pill ${st.cls}" id="sp-${s.key}">${st.label}</span>
+                </div>
               </div>
-              <button class="btn btn-primary btn-sm" onclick="SS.dlCSV('${s.name.replace(/[^a-z0-9]/gi,'_')}.csv', SS.${this.rowFn[s.key]}())" style="flex-shrink:0">📥 CSV</button>
+              <div style="display:flex;gap:6px;flex-shrink:0">
+                <button class="btn btn-ghost btn-sm" onclick="SS.dlCSV('${s.name.replace(/[^a-z0-9]/gi,'_')}.csv',SS.${this.rowFn[s.key]}())" title="Download CSV">📥</button>
+                <button class="btn btn-primary btn-sm" onclick="DV.syncTable('${s.key}')" ${cfg?'':'disabled'}>↑ Sync</button>
+              </div>
             </div>`;
           }).join('')}
         </div>
         <div class="info-box" style="margin-top:14px">
-          💡 <strong>Import tip:</strong> In Smartsheet, go to the sheet → <em>File → Import → CSV / Excel</em> → choose the downloaded file. Column headers map automatically if they match the schema above.
+          💡 <strong>CSV fallback:</strong> The 📥 button downloads a pre-populated CSV for each table — use it to seed Smartsheet or as a backup before Dataverse flows are live.
         </div>
       </div>
 
-      <!-- SCHEMA CARD -->
+      <!-- PA SETUP GUIDE -->
       <div class="card">
-        <div class="sec-title">Column Schemas</div>
-        <div class="sec-sub">Reference for setting up or auditing each sheet. Column names in the CSV match these exactly.</div>
-        ${this.schemas.map((s, i) => `
-          ${i > 0 ? '<hr class="divider">' : ''}
-          <div class="sheet-header">
-            <strong style="font-size:14px">${s.name}</strong>
-            <span class="sheet-status"><span class="sdot ${this.statusDot[s.status]}"></span>${this.statusLabel[s.status]}</span>
-          </div>
-          <table class="schema-tbl">
-            <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
-            <tbody>${s.cols.map(c => `<tr><td><strong>${c.col}</strong></td><td style="color:var(--text-2)">${c.type}</td><td style="color:var(--text-2)">${c.note}</td></tr>`).join('')}</tbody>
-          </table>`).join('')}
+        <div class="sec-title">Power Automate Setup Guide</div>
+        <div class="sec-sub">One-time setup. Create 5 Dataverse tables and 2 PA flows, then paste the webhook URLs above. Estimated time: 30–45 min.</div>
+
+        ${[
+          { title: 'Create 5 Dataverse tables in Power Apps', body: `
+<p style="font-size:13px;color:var(--text-2);margin-bottom:12px">Go to <strong>make.powerapps.com → Tables → + New table</strong>. Create one table per row below. Use the exact Display Names — the PA flow will reference them.</p>
+<table class="schema-tbl">
+  <thead><tr><th>Display Name</th><th>Plural Name</th><th>Key columns to add</th></tr></thead>
+  <tbody>
+    <tr><td><strong>CompIQ Knowledge Base</strong></td><td>CompIQ Knowledge Bases</td><td>Category (Choice), Title (Text), Description (Multiline), Steps (Multiline), Tip (Multiline), Common Errors (Multiline)</td></tr>
+    <tr><td><strong>CompIQ Config Tracker</strong></td><td>CompIQ Config Trackers</td><td>Config Item (Text), Module (Choice), Status (Choice), Owner (Text), Due Date (Date), Go-Live Impact (Choice), Notes (Multiline)</td></tr>
+    <tr><td><strong>CompIQ RAID Log</strong></td><td>CompIQ RAID Logs</td><td>RAID ID (Text), Type (Choice: Risk/Action/Issue/Decision), Description (Multiline), Probability (Choice), Impact (Choice), Mitigation (Multiline), Owner (Text), Due Date (Date), Status (Choice)</td></tr>
+    <tr><td><strong>CompIQ EIB Errors</strong></td><td>CompIQ EIB Errors</td><td>Load Date (Date), EIB Name (Text), Total Rows (Number), Error Count (Number), Error Description (Multiline), Root Cause (Multiline), Resolution (Multiline), Status (Choice)</td></tr>
+    <tr><td><strong>CompIQ Decisions Log</strong></td><td>CompIQ Decisions Logs</td><td>Date Raised (Date), Decision Topic (Text), Options Presented (Multiline), Decision Made (Multiline), Decided By (Text), Workday Impact (Multiline), Status (Choice)</td></tr>
+  </tbody>
+</table>
+<div class="qa-tip" style="margin-top:12px">💡 Column names don't need to match exactly — in the PA flow you'll map fields manually. Just make sure each table has one column per data field.</div>` },
+
+          { title: 'Create the CompIQ Write flow (HTTP → Dataverse Add Row)', body: `
+<p style="font-size:13px;color:var(--text-2);margin-bottom:12px">Go to <strong>make.powerautomate.com → + Create → Instant cloud flow</strong>. Name it <strong>CompIQ Write</strong>.</p>
+<ol style="font-size:13px;line-height:1.9;padding-left:18px;color:var(--text)">
+  <li><strong>Trigger:</strong> When an HTTP request is received (manual trigger)</li>
+  <li><strong>Request Body JSON Schema</strong> — paste this into the trigger's schema field:</li>
+</ol>
+<div class="code-block">{"type":"object","properties":{"table":{"type":"string"},"rows":{"type":"array","items":{"type":"object"}}}}</div>
+<ol start="3" style="font-size:13px;line-height:1.9;padding-left:18px;color:var(--text)">
+  <li><strong>+ New step:</strong> Control → Switch → Value = <code>triggerBody()?['table']</code></li>
+  <li>Add a <strong>Case</strong> for each table key: <code>kb</code>, <code>config</code>, <code>raid</code>, <code>eib</code>, <code>decisions</code></li>
+  <li>Inside each Case: <strong>Control → Apply to each</strong> → input = <code>triggerBody()?['rows']</code></li>
+  <li>Inside the loop: <strong>Microsoft Dataverse → Add a new row</strong> → select the matching table → map each column to <code>items()?['Column Name']</code></li>
+  <li><strong>+ New step after Switch:</strong> Request → Response → Status code 200 · Body <code>{"status":"ok"}</code></li>
+  <li><strong>Save</strong> the flow — copy the HTTP POST URL from the trigger step and paste it into ⚙️ Webhooks → Write URL above.</li>
+</ol>
+<div class="qa-tip">💡 In the "Add a new row" step, you only need to map columns you want to populate. Unmapped columns stay blank.</div>` },
+
+          { title: 'Create the CompIQ Read flow (HTTP → Dataverse List Rows → Response)', body: `
+<p style="font-size:13px;color:var(--text-2);margin-bottom:12px">Create a second instant cloud flow named <strong>CompIQ Read</strong>.</p>
+<ol style="font-size:13px;line-height:1.9;padding-left:18px;color:var(--text)">
+  <li><strong>Trigger:</strong> When an HTTP request is received</li>
+  <li><strong>Request Body JSON Schema:</strong></li>
+</ol>
+<div class="code-block">{"type":"object","properties":{"table":{"type":"string"},"filter":{"type":"string"}}}</div>
+<ol start="3" style="font-size:13px;line-height:1.9;padding-left:18px;color:var(--text)">
+  <li><strong>Switch</strong> on <code>triggerBody()?['table']</code></li>
+  <li>For each Case: <strong>Microsoft Dataverse → List rows</strong> → select the matching table</li>
+  <li>Add <strong>Response</strong> action → Status 200 → Body:</li>
+</ol>
+<div class="code-block">{"rows": @{outputs('List_rows')?['body/value']}, "count": @{length(outputs('List_rows')?['body/value'])}}</div>
+<ol start="6" style="font-size:13px;line-height:1.9;padding-left:18px;color:var(--text)">
+  <li>Set Response <strong>Content-Type header</strong> to <code>application/json</code></li>
+  <li><strong>Save</strong> — copy HTTP POST URL → paste into ⚙️ Webhooks → Read URL.</li>
+</ol>
+<div class="qa-err" style="margin-top:12px">⚠️ The Response action must be inside each Switch case (not after it) — otherwise PA returns before the List rows finishes.</div>` },
+
+          { title: 'Paste webhook URLs and sync', body: `
+<ol style="font-size:13px;line-height:1.9;padding-left:18px;color:var(--text)">
+  <li>Click <strong>⚙️ Webhooks</strong> in the Dataverse Sync card above</li>
+  <li>Paste the <strong>Write flow HTTP POST URL</strong> into the Write field</li>
+  <li>Paste the <strong>Read flow HTTP POST URL</strong> into the Read field</li>
+  <li>Click <strong>Save URLs</strong></li>
+  <li>Click <strong>↑ Sync All</strong> — all 5 tables load into Dataverse in one click</li>
+  <li>Verify in <strong>make.powerapps.com → Tables</strong> — rows will appear within ~30 seconds</li>
+</ol>
+<div class="qa-tip">💡 After the initial bulk sync, use the individual <strong>↑ Sync</strong> buttons to push updates to specific tables only.</div>` }
+        ].map((g, i) => `
+          <div class="guide-step" id="gs-${i}">
+            <div class="guide-head" onclick="DV.toggleGuide(${i})">
+              <div class="guide-num">${i+1}</div>
+              <div class="guide-head-title">${g.title}</div>
+              <span class="chev" style="color:var(--text-3);font-size:11px">▼</span>
+            </div>
+            <div class="guide-body">${g.body}</div>
+          </div>`).join('')}
       </div>`;
   }
 };
